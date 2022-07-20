@@ -115,7 +115,7 @@ trace_gpu_pid=$!
 
 
 # Start training within the tmux session. 
-tmux send-keys -t training "${workload_dir}/start_training.sh $2" C-m
+tmux send-keys -t training "${workload_dir}/start_training.sh $num_gpus" C-m
 
 sleep 1
 
