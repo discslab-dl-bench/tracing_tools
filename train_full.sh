@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
 cd /tracing_tools
 
 # Force running as root -- not the best. Ideally we could use sudo.
@@ -80,30 +81,29 @@ tmux kill-session -t training 2>/dev/null
 tmux new-session -d -s training
 
 # Start the bpf traces, storing their pid
-bpftrace trace_bio.bt -o ${output_dir}/trace_bio.out &
+bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
 trace_bio_pid=$!
 
-bpftrace trace_read.bt -o ${output_dir}/trace_read.out &
+bpftrace traces/trace_read.bt -o ${output_dir}/trace_read.out &
 trace_read_pid=$!
 
-bpftrace trace_write.bt -o ${output_dir}/trace_write.out &
+bpftrace traces/trace_write.bt -o ${output_dir}/trace_write.out &
 trace_write_pid=$!
 
-bpftrace trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+bpftrace traces/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 trace_create_del_pid=$!
 
-bpftrace trace_openat.bt -o ${output_dir}/trace_openat.out &
+bpftrace traces/trace_openat.bt -o ${output_dir}/trace_openat.out &
 trace_openat_pid=$!
 
-bpftrace trace_close.bt -o ${output_dir}/trace_close.out &
+bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-bpftrace trace_mmap.bt -o ${output_dir}/trace_mmap.out &
+bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
 trace_mmap_pid=$!
 
-
 # Start time alignment trace
-bpftrace trace_time_align.bt -o ${output_dir}/trace_time_align.out &
+bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
 trace_time_align_pid=$!
 
 # Start the CPU and GPU traces
