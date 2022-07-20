@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script will launch and trace the image segmentation workload
+# gathering and zipping the traces at the end.  
+
 # CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
 cd /tracing_tools
 
@@ -141,7 +144,7 @@ sleep 120
 
 echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 # Save PID/TID map for later reference
-ps aux -T | grep python > ${output_dir}/pids_tids.out
+ps aux -T | grep python > ${output_dir}/pids.out
 
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid
