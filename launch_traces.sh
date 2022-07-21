@@ -84,13 +84,12 @@ trace_cpu_pid=$!
 nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		#TODO: replace with Nsight
 trace_gpu_pid=$!
 
-echo "Hit Ctrl-c to stop..."
+echo "Hit Ctrl-c to stop... the time alignment trace will stop in 60s"
 
-# idle waiting for ctrl-c from user
+# idle waiting for ctrl-c from user for 60s
 read -t 60 -r -d '' _ </dev/tty
 
 echo "60s have passed, killing time_alignment trace"
-
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid
 
@@ -98,6 +97,8 @@ echo "Hit Ctrl-c to stop..."
 
 # idle waiting for ctrl-c from user
 read -r -d '' _ </dev/tty
+
+echo "Ctrl-c received. Killing all traces"
 
 # Kill the traces
 kill $trace_bio_pid
@@ -116,5 +117,7 @@ for proc in $remaining_traces;
 do	
 	kill $proc
 done
+
+echo "All done!"
 
 exit 0
