@@ -19,7 +19,7 @@ As previously mentionned, these traces are developed for `bpftrace` which is a t
 
 In the main directory you will find shell scripts used to launch these traces:
 - `trace_imseg.sh` is used to trace the image segmentation workload specifically. It starts all the traces, then the workload, then waits until completion to shut off the traces and archive them. I recommend creating a similar script to trace other workloads, use it as inspiration.
-- `launch_traces.sh` launches all the traces, oddly enough :p. It then waits for the user to hit `Ctrl-c` before closing the traces. 
+- `launch_traces.sh` launches all the traces, oddly enough :p. It then waits for the user to hit `Ctrl-c` before closing the traces. You can use this for testing or for small scale tracing. 
 
 We use `mpstat` to get the CPU trace and `nvidia-smi pmon` to get the GPU trace.
 
