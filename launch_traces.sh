@@ -50,13 +50,6 @@ echo 3 > /proc/sys/vm/drop_caches
 
 sleep 5
 
-# Kill the tmux session from a previous run if it exists
-tmux kill-session -t traces 2>/dev/null
-
-# Start a new tmux session from which we will run the traces
-# Using tmux allows us to keep the traces running if our connection drops
-tmux new-session -s traces
-
 # Start the bpf traces, storing their pid
 bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
 trace_bio_pid=$!
