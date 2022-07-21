@@ -96,13 +96,10 @@ echo "Slept 120s, killing time_alignment trace"
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid
 
-echo "Now waiting until training completion..."
+echo "Hit Ctrl-c to stop..."
 
-# idle waiting for abort from user
+# idle waiting for ctrl-c from user
 read -r -d '' _ </dev/tty
-
-# Sleep a bit more once training stops to capture full shutting down
-sleep 5
 
 # Kill the traces
 kill $trace_bio_pid
@@ -121,8 +118,5 @@ for proc in $remaining_traces;
 do	
 	kill $proc
 done
-
-# Archive the traces and copy them to discs server
-tar zcvf "${output_dir}/traces_${exp_name}.tar.gz" $output_dir
 
 exit 0

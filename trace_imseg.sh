@@ -185,12 +185,8 @@ cp ${workload_dir}/results/* $output_dir
 # Copy the ckpt file to the results directory
 cp ${workload_dir}/ckpts/ckpt_* $output_dir
 
-# Archive the traces and copy them to discs server
-tar zcvf "${output_dir}/traces_${exp_name}.tar.gz" $output_dir
-
-
-#./send_to_discs.sh "/results/traces_${exp_name}.tar.gz" /data/MLIO/aws_exp_results
-# rm -rf $output_dir/*
-
+# Archive the traces
+output_parent_dir="$(dirname "$output_dir")"
+tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
 
 exit 0
