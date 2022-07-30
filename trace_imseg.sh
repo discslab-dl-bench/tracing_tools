@@ -1,30 +1,53 @@
 #!/bin/bash
 
+# This script will launch and trace the image segmentation workload
+# gathering and zipping the traces at the end.  
+
+# CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
 cd /tracing_tools
 
-# Force running as root
+# Force running as root -- not the best. Ideally we could use sudo.
 if [ "${EUID:-$(id -u)}" -ne 0 ]
 then
 	echo "Run script as root"
 	exit -1
 fi
 
-if [ $# -lt 2 ]
+if [ $# -lt 3 ]
 then
-	echo "Usage: $0 <output_dir> <num_gpus> (<experiment_name>)"
-	exit -1
+	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
+	exit 1
 fi
 
-output_dir=$1
-num_gpus=$2
+workload_dir=$1
+output_dir=$2
+num_gpus=$3
 
-if [ $# -eq 3 ]
+# Get the optional 4th argument
+if [ $# -eq 4 ]
 then	
-	exp_name="${3}"
+	exp_name="${4}"
+else
+	exp_name="experiment"
 fi
 
-exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
+# Argument validation
 
+# Fix given paths i.e. remove trailing or extra slashes
+workload_dir=$(realpath -s  --canonicalize-missing $workload_dir)
+output_dir=$(realpath -s  --canonicalize-missing $output_dir)
+
+# Ensure num_gpus is numeric
+re='^[0-9]+$'
+if ! [[ $num_gpus =~ $re ]] ; then
+   echo "Error: '$num_gpus' is not a number. <num_gpus> must be a number." >&2
+   echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
+   exit 1
+fi
+
+
+# Create the output directory
+exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
 output_dir="${output_dir}/${exp_name}/"
 
 if [ ! -d $output_dir ] 
@@ -40,54 +63,50 @@ echo 3 > /proc/sys/vm/drop_caches
 sleep 5
 
 # Delete previous app log if it exists
-if [ "$(ls /mlcommons_training/image_segmentation/pytorch/results)" ]
+if [ "$(ls ${workload_dir}/results)" ]
 then
 	echo "Deleting old app log and casefile logs"
-	rm /mlcommons_training/image_segmentation/pytorch/results/*
+	rm ${workload_dir}/results/*
 fi
 
 # Delete previous checkpoint file(s) if it (they) exists
-if [ "$(ls /mlcommons_training/image_segmentation/pytorch/ckpts)" ]
+if [ "$(ls ${workload_dir}/ckpts)" ]
 then
 	echo "Deleting old checkpoint files"
-	rm /mlcommons_training/image_segmentation/pytorch/ckpts/*
+	rm ${workload_dir}/ckpts/*
 fi
 
-# Clean-up from a previous session if needed
-tmux kill-session -t training
 
-# Start a new tmux session with a live docker container inside
+# Kill the tmux session from a previous run if it exists
+tmux kill-session -t training 2>/dev/null
+
+# Start a new tmux session from which we will run training
 tmux new-session -d -s training
 
-
 # Start the bpf traces, storing their pid
-bpftrace trace_bio.bt -o ${output_dir}/trace_bio.out &
+bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
 trace_bio_pid=$!
 
-bpftrace trace_read.bt -o ${output_dir}/trace_read.out &
+bpftrace traces/trace_read.bt -o ${output_dir}/trace_read.out &
 trace_read_pid=$!
 
-bpftrace trace_write.bt -o ${output_dir}/trace_write.out &
+bpftrace traces/trace_write.bt -o ${output_dir}/trace_write.out &
 trace_write_pid=$!
 
-# bpftrace trace_read_addr.bt -o ${output_dir}/trace_read_addr.out &
-# trace_read_addr_pid=$!
-
-bpftrace trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+bpftrace traces/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 trace_create_del_pid=$!
 
-bpftrace trace_openat.bt -o ${output_dir}/trace_openat.out &
+bpftrace traces/trace_openat.bt -o ${output_dir}/trace_openat.out &
 trace_openat_pid=$!
 
-bpftrace trace_close.bt -o ${output_dir}/trace_close.out &
+bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-bpftrace trace_mmap.bt -o ${output_dir}/trace_mmap.out &
+bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
 trace_mmap_pid=$!
 
-
 # Start time alignment trace
-bpftrace trace_time_align.bt -o ${output_dir}/trace_time_align.out &
+bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
 trace_time_align_pid=$!
 
 # Start the CPU and GPU traces
@@ -99,7 +118,7 @@ trace_gpu_pid=$!
 
 
 # Start training within the tmux session. 
-tmux send-keys -t training "/mlcommons_training/image_segmentation/pytorch/start_training.sh $2" C-m
+tmux send-keys -t training "${workload_dir}/start_training.sh $num_gpus" C-m
 
 sleep 1
 
@@ -107,6 +126,7 @@ sleep 1
 root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
 echo "root pid: \"$root_pid\""
 
+# If the previous command did not work (sometimes we must wait a bit), retry in a loop
 while [ -z "$root_pid" ]
 do
 	echo "failed to get training pid, trying again"
@@ -124,7 +144,7 @@ sleep 120
 
 echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 # Save PID/TID map for later reference
-ps aux -T | grep python > ${output_dir}/pids_tids.out
+ps aux -T | grep python > ${output_dir}/pids.out
 
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid
@@ -140,11 +160,10 @@ done
 sleep 10
 
 # Kill the training process and the traces
-# Strace was stopped when root_pid ended
+# if using strace, it was stopped when root_pid ended
 ./kill_training.sh
 kill $trace_bio_pid
 kill $trace_read_pid
-# kill $trace_read_addr_pid
 kill $trace_write_pid
 kill $trace_create_del_pid
 kill $trace_openat_pid
@@ -161,17 +180,13 @@ do
 done
 
 # Copy the application log and casefile logs to the results directory
-cp /mlcommons_training/image_segmentation/pytorch/results/* $output_dir
+cp ${workload_dir}/results/* $output_dir
 
 # Copy the ckpt file to the results directory
-cp /mlcommons_training/image_segmentation/pytorch/ckpts/ckpt_* $output_dir
+cp ${workload_dir}/ckpts/ckpt_* $output_dir
 
-# Archive the traces and copy them to discs server
-tar zcvf "/results/traces_${exp_name}.tar.gz" $output_dir
-
-#./send_to_discs.sh "/results/traces_${exp_name}.tar.gz" /data/MLIO/aws_exp_results
-
-# rm -rf $output_dir/*
-
+# Archive the traces
+output_parent_dir="$(dirname "$output_dir")"
+tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
 
 exit 0
