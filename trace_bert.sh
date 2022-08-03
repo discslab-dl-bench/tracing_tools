@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script will launch and trace the image segmentation workload
+# This script will launch and trace the BERT language model workload
 # gathering and zipping the traces at the end.  
 
 # CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
@@ -63,17 +63,10 @@ echo 3 > /proc/sys/vm/drop_caches
 sleep 5
 
 # Delete previous app log if it exists
-if [ "$(ls ${workload_dir}/results)" ]
+if [ "$(ls ${output_dir}/results)" ]
 then
 	echo "Deleting old app log and casefile logs"
-	rm ${workload_dir}/results/*
-fi
-
-# Delete previous checkpoint file(s) if it (they) exists
-if [ "$(ls ${workload_dir}/ckpts)" ]
-then
-	echo "Deleting old checkpoint files"
-	rm ${workload_dir}/ckpts/*
+	rm ${output_dir}/results/*
 fi
 
 
@@ -113,12 +106,13 @@ trace_time_align_pid=$!
 mpstat 1 > ${output_dir}/cpu.out &
 trace_cpu_pid=$!
 
-nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		#TODO: replace with Nsight
+#TODO: Explore using Nsight for GPU tracing
+nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		
 trace_gpu_pid=$!
 
 
 # Start training within the tmux session. 
-tmux send-keys -t training "${workload_dir}/start_training.sh $num_gpus" C-m
+tmux send-keys -t training "${workload_dir}/start_training.sh" C-m
 
 sleep 1
 
@@ -179,11 +173,8 @@ do
 	kill $proc
 done
 
-# Copy the application log and casefile logs to the results directory
-cp ${workload_dir}/results/* $output_dir
-
-# Copy the ckpt file to the results directory
-cp ${workload_dir}/ckpts/ckpt_* $output_dir
+# Copy the application log to the results directory
+cp ${workload_dir}/results/bert.log $output_dir
 
 # Archive the traces
 output_parent_dir="$(dirname "$output_dir")"
