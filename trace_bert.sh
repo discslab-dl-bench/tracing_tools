@@ -112,10 +112,9 @@ trace_gpu_pid=$!
 
 echo "Starting training"
 # Start training within the tmux session. 
-tmux send-keys -t training "${workload_dir}/start_training.sh" C-m
+tmux send-keys -t training "sudo ${workload_dir}/start_training.sh" C-m
 
-echo "Waiting for training to start"
-sleep 5
+sleep 1
 
 # Get the system-wide PID of the root process ID in the container (bash)
 root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
