@@ -48,7 +48,7 @@ fi
 
 # Create the output directory
 exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
-output_dir="${output_dir}/${exp_name}/"
+output_dir="${output_dir}/${exp_name}"
 
 if [ ! -d $output_dir ] 
 then
@@ -69,7 +69,7 @@ then
 	rm ${output_dir}/results/*
 fi
 
-
+echo "Starting traces"
 # Kill the tmux session from a previous run if it exists
 tmux kill-session -t training 2>/dev/null
 
@@ -110,11 +110,12 @@ trace_cpu_pid=$!
 nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		
 trace_gpu_pid=$!
 
-
+echo "Starting training"
 # Start training within the tmux session. 
 tmux send-keys -t training "${workload_dir}/start_training.sh" C-m
 
-sleep 1
+echo "Waiting for training to start"
+sleep 5
 
 # Get the system-wide PID of the root process ID in the container (bash)
 root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
