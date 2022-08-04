@@ -5,7 +5,7 @@
 
 # CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
 # TODO: Find a better way to do this
-cd /tracing_tools
+# cd /tracing_tools
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]
 then
