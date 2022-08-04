@@ -50,10 +50,10 @@ tracepoint:syscalls:sys_exit_openat
 	$now = nsecs;
 	$latency = $now - @o_start[tid];
 
-	printf("%-17lu %-6d %-5d %-8d %s %s\n",
+	printf("%-17lu %-6d %s %-8d %s %s\n",
 		$now, 
 		pid,
-		args->ret,			// the file descriptor
+		comm,			// the file descriptor
 		$latency,
 		@o_fullpath[tid],
 		@o_filename[tid]

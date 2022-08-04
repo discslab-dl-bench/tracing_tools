@@ -53,10 +53,10 @@ tracepoint:syscalls:sys_exit_read
 	$now = nsecs;
 	$latency = $now - @read_start[tid];
 
-	printf("%-17lu %-6d %-4d %-12lu %-12lu %s\n", 
+	printf("%-17lu %-6d %s %-12lu %-12lu %s\n", 
 		$now,
 		pid,
-		@read_fd[tid],
+		comm,
 		args->ret, 			// number of bytes returned
 		$latency, 
 		@filename[tid]
