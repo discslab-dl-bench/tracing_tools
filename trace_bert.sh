@@ -95,8 +95,8 @@ trace_openat_pid=$!
 bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
-trace_mmap_pid=$!
+# bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
+# trace_mmap_pid=$!
 
 # Start time alignment trace
 bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
@@ -114,8 +114,6 @@ echo "Starting training"
 # Start training within the tmux session. 
 tmux send-keys -t training "sudo ${workload_dir}/start_training.sh" C-m
 
-sleep 1
-
 # Get the system-wide PID of the root process ID in the container (bash)
 root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
 echo "root pid: \"$root_pid\""
@@ -131,14 +129,15 @@ done
 
 # Attach the syscall trace to the root_process 
 # It will automatically attach to all spawned child processes
-#strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
 
 # Sleep a bit to let training spawn all workers
 sleep 120
 
 echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
-# Save PID/TID map for later reference
-ps aux -T | grep python > ${output_dir}/pids.out
+
+# # Save PID/TID map for later reference
+# ps aux -T | grep python > ${output_dir}/pids.out
 
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid
@@ -162,7 +161,7 @@ kill $trace_write_pid
 kill $trace_create_del_pid
 kill $trace_openat_pid
 kill $trace_close_pid
-kill $trace_mmap_pid
+# kill $trace_mmap_pid
 kill $trace_cpu_pid
 kill $trace_gpu_pid
 
@@ -173,11 +172,11 @@ do
 	kill $proc
 done
 
-# Copy the application log to the results directory
-cp ${workload_dir}/results/bert.log $output_dir
+# # Copy the application log to the results directory
+# cp ${workload_dir}/bert.log $output_dir
 
-# Archive the traces
-output_parent_dir="$(dirname "$output_dir")"
-tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
+# # Archive the traces
+# output_parent_dir="$(dirname "$output_dir")"
+# tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
 
 exit 0
