@@ -29,7 +29,8 @@ comm != "lspci" && comm != "top" && comm != "smartctl" && comm != "nvipmitool"
 }
 
 kprobe:blk_account_io_done
-/@disk[arg0] == "xvda" && @start[arg0] != 0 && @iopid[arg0] != 0 && @iocomm[arg0] != ""/
+//@disk[arg0] == "xvda" && @start[arg0] != 0 && @iopid[arg0] != 0 && @iocomm[arg0] != ""/
+/ @start[arg0] != 0 && @iopid[arg0] != 0 && @iocomm[arg0] != ""/
 {
 	$now = nsecs;
 	
