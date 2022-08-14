@@ -12,18 +12,17 @@ fi
 
 if [ $# -lt 3 ]
 then
-	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
+	echo "Usage: $0 <workload_dir> <output_dir> (<experiment_name>)"
 	exit 1
 fi
 
 workload_dir=$1
 output_dir=$2
-num_gpus=$3
 
 # Get the optional 4th argument
-if [ $# -eq 4 ]
+if [ $# -eq 3 ]
 then	
-	exp_name="${4}"
+	exp_name="${3}"
 else
 	exp_name="experiment"
 fi
@@ -33,15 +32,6 @@ fi
 # Fix given paths i.e. remove trailing or extra slashes
 workload_dir=$(realpath -s  --canonicalize-missing $workload_dir)
 output_dir=$(realpath -s  --canonicalize-missing $output_dir)
-
-# Ensure num_gpus is numeric
-re='^[0-9]+$'
-if ! [[ $num_gpus =~ $re ]] ; then
-   echo "Error: '$num_gpus' is not a number. <num_gpus> must be a number." >&2
-   echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
-   exit 1
-fi
-
 
 # Create the output directory
 exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
@@ -58,13 +48,6 @@ sync
 echo 3 > /proc/sys/vm/drop_caches
 
 sleep 5
-
-# Delete previous app log if it exists
-if [ "$(ls ${output_dir}/results)" ]
-then
-	echo "Deleting old app log and casefile logs"
-	rm ${output_dir}/results/*
-fi
 
 echo "Starting traces"
 # Kill the tmux session from a previous run if it exists
