@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# This script will launch and trace the BERT language model workload
-# gathering and zipping the traces at the end.  
-
+# This script will launch and trace DLIO.
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]
 then
