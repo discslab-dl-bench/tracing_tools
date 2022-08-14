@@ -20,7 +20,7 @@ BEGIN
 //     int flags;
 //     umode_t mode;
 tracepoint:syscalls:sys_enter_openat	
-/ comm == "python3" || comm == "run_dlio.sh" /
+/ comm == "python3" /
 {
 	@o_start[tid] = nsecs;
 	@o_flags[tid] = args->flags;
