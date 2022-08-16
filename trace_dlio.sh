@@ -17,8 +17,8 @@ fi
 workload_dir=$1
 output_dir=$2
 
-# Get the optional 4th argument
-if [ $# -eq 3 ]
+# Get the optional 3rd argument
+if [ $# -eq 2 ]
 then	
 	exp_name="${3}"
 else

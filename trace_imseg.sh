@@ -5,7 +5,7 @@
 
 # CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
 # TODO: Find a better way to do this
-cd /tracing_tools
+# cd /tracing_tools (this line will cause trouble if run the script in /tracing_tools dir directly!)
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]
 then
@@ -102,8 +102,8 @@ trace_openat_pid=$!
 bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
-trace_mmap_pid=$!
+# bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
+# trace_mmap_pid=$!
 
 # Start time alignment trace
 bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
@@ -168,7 +168,7 @@ kill $trace_write_pid
 kill $trace_create_del_pid
 kill $trace_openat_pid
 kill $trace_close_pid
-kill $trace_mmap_pid
+# kill $trace_mmap_pid
 kill $trace_cpu_pid
 kill $trace_gpu_pid
 
