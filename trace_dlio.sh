@@ -8,7 +8,7 @@ then
 	exit -1
 fi
 
-if [ $# -lt 3 ]
+if [ $# -lt 2 ]
 then
 	echo "Usage: $0 <workload_dir> <output_dir> (<experiment_name>)"
 	exit 1
