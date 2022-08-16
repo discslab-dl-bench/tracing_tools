@@ -104,7 +104,7 @@ done
 
 # Attach the syscall trace to the root_process 
 # It will automatically attach to all spawned child processes
-strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+# strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
 
 # Sleep a bit to let training spawn all workers
 sleep 120
@@ -112,7 +112,7 @@ sleep 120
 echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 
 # # Save PID/TID map for later reference
-# ps aux -T | grep python > ${output_dir}/pids.out
+ps aux -T | grep python > ${output_dir}/pids.out
 
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid
@@ -129,7 +129,7 @@ sleep 10
 
 # Kill the training process and the traces
 # if using strace, it was stopped when root_pid ended
-./kill_training.sh
+./kill_dlio.sh
 kill $trace_bio_pid
 kill $trace_read_pid
 kill $trace_write_pid
@@ -140,17 +140,15 @@ kill $trace_cpu_pid
 kill $trace_gpu_pid
 
 # Kill any remaining traces that didn't get killed above
-remaining_traces=$(ps | grep bpf | awk '{print $1}')
+remaining_traces=$(ps aux | grep bpftrace | awk '{print $2}')
 for proc in $remaining_traces; 
 do	
 	kill $proc
 done
 
-# # Copy the application log to the results directory
-# cp ${workload_dir}/bert.log $output_dir
 
-# # Archive the traces
-# output_parent_dir="$(dirname "$output_dir")"
-# tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
+# Archive the traces
+output_parent_dir="$(dirname "$output_dir")"
+tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
 
 exit 0
