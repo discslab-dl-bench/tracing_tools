@@ -102,9 +102,6 @@ trace_openat_pid=$!
 bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-# bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
-# trace_mmap_pid=$!
-
 # Start time alignment trace
 bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
 trace_time_align_pid=$!
@@ -118,7 +115,7 @@ trace_gpu_pid=$!
 
 
 # Start training within the tmux session. 
-tmux send-keys -t training "${workload_dir}/start_training.sh $num_gpus" C-m
+tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus" C-m
 
 sleep 1
 
@@ -127,6 +124,7 @@ root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /d
 echo "root pid: \"$root_pid\""
 
 # If the previous command did not work (sometimes we must wait a bit), retry in a loop
+# FIXME: Seems like getting stuck in here while training
 while [ -z "$root_pid" ]
 do
 	echo "failed to get training pid, trying again"
@@ -168,12 +166,11 @@ kill $trace_write_pid
 kill $trace_create_del_pid
 kill $trace_openat_pid
 kill $trace_close_pid
-# kill $trace_mmap_pid
 kill $trace_cpu_pid
 kill $trace_gpu_pid
 
 # Kill any remaining traces that didn't get killed above
-remaining_traces=$(ps | grep bpf | awk '{print $1}')
+remaining_traces=$(ps aux | grep bpftrace | awk '{print $2}')
 for proc in $remaining_traces; 
 do	
 	kill $proc
