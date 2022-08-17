@@ -112,7 +112,8 @@ sleep 120
 echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 
 # # Save PID/TID map for later reference
-ps aux -T | grep python > ${output_dir}/pids.out
+# excluding the pids of vscode-server
+ps aux -T | grep python | grep -wv vscode-server > ${output_dir}/pids.out
 
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid

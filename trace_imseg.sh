@@ -141,7 +141,9 @@ sleep 120
 
 echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 # Save PID/TID map for later reference
-ps aux -T | grep python > ${output_dir}/pids.out
+
+# excluding the pids of vscode-server
+ps aux -T | grep python | grep -wv vscode-server > ${output_dir}/pids.out
 
 # Kill the time alignment trace early, 2min should be plenty
 kill $trace_time_align_pid
@@ -181,7 +183,7 @@ cp ${workload_dir}/results/* $output_dir
 
 # Copy the ckpt file to the results directory
 cp ${workload_dir}/ckpts/ckpt_* $output_dir
-
+sleep 5 # give some time for copying to happen
 # Archive the traces
 output_parent_dir="$(dirname "$output_dir")"
 tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
