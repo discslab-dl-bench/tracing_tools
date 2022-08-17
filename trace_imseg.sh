@@ -124,7 +124,6 @@ root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /d
 echo "root pid: \"$root_pid\""
 
 # If the previous command did not work (sometimes we must wait a bit), retry in a loop
-# FIXME: Seems like getting stuck in here while training
 while [ -z "$root_pid" ]
 do
 	echo "failed to get training pid, trying again"
@@ -150,6 +149,7 @@ kill $trace_time_align_pid
 echo "Now waiting until training completion"
 
 # Now wait until training finishes
+# FIXME: seems to need a kill -9 $root_pid to end the while loop
 while kill -0 "$root_pid"; do
 	sleep 5
 done
