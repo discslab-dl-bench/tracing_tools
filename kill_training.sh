@@ -3,5 +3,5 @@
 sudo docker kill training
 sudo docker rm training
 
-tmux kill-session -t training
+sudo tmux kill-session -t training
 

@@ -116,7 +116,7 @@ trace_gpu_pid=$!
 
 # Start training within the tmux session. 
 tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus" C-m
-
+# tmux send-keys -t testing "python -c "for i in range(1000000): print(i)"" C-m
 sleep 1
 
 # Get the system-wide PID of the root process ID in the container (bash)

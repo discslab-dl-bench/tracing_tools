@@ -13,7 +13,7 @@ BEGIN
 }
 
 kprobe:blk_account_io_start
-/ comm == "python3" /
+/ comm == "python3" || comm == "python" /
 {
 	@start[arg0] = nsecs;
 	@iopid[arg0] = pid;

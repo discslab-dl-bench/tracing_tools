@@ -77,7 +77,8 @@ trace_cpu_pid=$!
 # Start the GPU trace
 nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		#TODO: replace with Nsight
 trace_gpu_pid=$!
-
+sleep 120
+ps aux -T | grep python | grep -wv vscode-server > ${output_dir}/pids.out
 echo "Hit Ctrl-c to stop... the time alignment trace will stop in 60s"
 
 # idle waiting for ctrl-c from user for 60s
