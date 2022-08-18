@@ -5,10 +5,12 @@ resultdir="/dl-bench/ruoyudeng/tracing_tools/trace_results"
 
 
 numgpus=$1
+experiment_name=$2
 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
 then
-	echo "Usage: $0 <numgpus>"
+    # example: ./trace_imseg_simple.sh 4 exp_4gpus
+	echo "Usage: $0 <numgpus> <experiment_name>"
 	exit 1
 fi
 
