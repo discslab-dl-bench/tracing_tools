@@ -151,7 +151,9 @@ kill $trace_time_align_pid
 echo "Now waiting until training completion"
 
 # Now wait until training finishes
-# FIXME: immediately killed training
+# kill -0 will check if the process is runing or not, if it is not, then break the loop
+# FIXME: when training is done, the root process is not terminated correctly, so we get stuck in the loop
+# reason: some other root docker containers are running, make sure there is NO other docker containers before running this trace script
 while kill -0 "$root_pid"; do
 	sleep 5
 done
