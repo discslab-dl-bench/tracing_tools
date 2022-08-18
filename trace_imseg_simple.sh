@@ -14,4 +14,4 @@ then
 	exit 1
 fi
 
-./trace_imseg.sh $workdir $resultdir $numgpus
+./trace_imseg.sh $workdir $resultdir $numgpus $experiment_name
