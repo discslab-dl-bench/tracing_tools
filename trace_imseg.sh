@@ -151,7 +151,7 @@ kill $trace_time_align_pid
 echo "Now waiting until training completion"
 
 # Now wait until training finishes
-# FIXME: seems to need a kill -9 $root_pid to end the while loop
+# FIXME: immediately killed training
 while kill -0 "$root_pid"; do
 	sleep 5
 done
