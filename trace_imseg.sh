@@ -62,19 +62,37 @@ echo 3 > /proc/sys/vm/drop_caches
 
 sleep 5
 
-# Delete previous app log if it exists
-if [ "$(ls ${workload_dir}/results)" ]
+# Stroing results based on diff exp_name
+result_dir="${workload_dir}/results/${exp_name}/results"
+if [ ! -d $result_dir ]
 then
-	echo "Deleting old app log and casefile logs"
-	rm ${workload_dir}/results/*
+
+	echo "Creating directory to store results in: ${result_dir}"
+	mkdir -p $result_dir
 fi
 
-# Delete previous checkpoint file(s) if it (they) exists
-if [ "$(ls ${workload_dir}/ckpts)" ]
+
+ckpts_dir="${workload_dir}/ckpts/${exp_name}/ckpts"
+if [ ! -d $ckpts_dir ]
 then
-	echo "Deleting old checkpoint files"
-	rm ${workload_dir}/ckpts/*
+	echo "Creating directory to store ckpts in: ${ckpts_dir}"
+	mkdir -p $ckpts_dir
 fi
+
+
+# # Delete previous app log if it exists
+# if [ "$(ls ${workload_dir}/results)" ]
+# then
+# 	echo "Deleting old app log and casefile logs"
+# 	rm ${workload_dir}/results/*
+# fi
+
+# # Delete previous checkpoint file(s) if it (they) exists
+# if [ "$(ls ${workload_dir}/ckpts)" ]
+# then
+# 	echo "Deleting old checkpoint files"
+# 	rm ${workload_dir}/ckpts/*
+# fi
 
 
 # Kill the tmux session from a previous run if it exists
@@ -115,6 +133,7 @@ trace_gpu_pid=$!
 
 
 # Start training within the tmux session. 
+# tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus $exp_name" C-m
 tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus" C-m
 # tmux send-keys -t testing "python -c "for i in range(1000000): print(i)"" C-m
 sleep 1
