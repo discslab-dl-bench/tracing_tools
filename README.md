@@ -27,3 +27,9 @@ We use `mpstat` to get the CPU trace and `nvidia-smi pmon` to get the GPU trace.
 Should you be tracing for a long time, I recommend running the tracing script from a `tmux` session. To do simply type `tmux` and you will be put in a new session. 
 
 You can also run `tmux new-session -d -s <session-name>` to name your session. While inside a tmux session hit `Ctrl-b` then `d` to detach. Run `tmux ls` to list the active sessions and `tmux attach -t <session-name or id>` to attach.
+
+# More Tracing Tools (Added by Ruoyu)
+- `trace_imseg_simple.sh` is a simpler version of `trace_imseg.sh` to use. It is identical to `trace_imseg.sh` but with less argument to type (not that meaningful).
+- `run_experiments.sh` is a script which runs all experiment combinations. Need to edit the content to run experiments.
+    - Ex) If we edit `gpus = (1 2 4 8)`, `data_paths = (path1, path2)`, then `run_experiments.sh` will run 8 experiements in total.
+- `start_experiments.sh` is a small script that runs `run_experiments.sh` in a tmux session called `imseg_experiments`.
