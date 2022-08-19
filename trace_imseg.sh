@@ -13,20 +13,21 @@ then
 	exit -1
 fi
 
-if [ $# -lt 3 ]
+if [ $# -lt 4 ]
 then
-	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
+	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <data_path> (<experiment_name>)"
 	exit 1
 fi
 
 workload_dir=$1
 output_dir=$2
 num_gpus=$3
+data_path=$4
 
-# Get the optional 4th argument
-if [ $# -eq 4 ]
+# Get the optional 5th argument
+if [ $# -eq 5 ]
 then	
-	exp_name="${4}"
+	exp_name="${5}"
 else
 	exp_name="experiment"
 fi
@@ -133,8 +134,8 @@ trace_gpu_pid=$!
 
 
 # Start training within the tmux session. 
-# tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus $exp_name" C-m
-tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus" C-m
+tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus $exp_name $data_path" C-m
+# tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus" C-m
 # tmux send-keys -t testing "python -c "for i in range(1000000): print(i)"" C-m
 sleep 1
 
