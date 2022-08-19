@@ -201,10 +201,10 @@ do
 done
 
 # Copy the application log and casefile logs to the results directory
-cp ${workload_dir}/results/* $output_dir
+cp ${result_dir}/* $output_dir
 
 # Copy the ckpt file to the results directory
-cp ${workload_dir}/ckpts/ckpt_* $output_dir
+cp ${ckpts_dir}/ckpt_* $output_dir
 sleep 5 # give some time for copying to happen
 # Archive the traces
 output_parent_dir="$(dirname "$output_dir")"
