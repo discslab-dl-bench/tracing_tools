@@ -140,7 +140,9 @@ tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus $ex
 sleep 1
 
 # Get the system-wide PID of the root process ID in the container (bash)
-root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
+# added: only want 1 root pid: awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}'
+root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}' | awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}')
+echo $root_pid
 echo "root pid: \"$root_pid\""
 
 # If the previous command did not work (sometimes we must wait a bit), retry in a loop
@@ -148,7 +150,7 @@ while [ -z "$root_pid" ]
 do
 	echo "failed to get training pid, trying again"
 	sleep 1
-	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
+	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}' | awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}')
 	echo "new try: $root_pid"
 done
 

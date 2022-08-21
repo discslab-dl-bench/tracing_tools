@@ -12,7 +12,8 @@ for data_path in ${data_paths[@]}; do
         ./trace_imseg.sh $workload_dir $output_dir $gpu $data_path $exp_name &
         training_pid=$!
         while kill -0 "$training_pid"; do
-            sleep 600 # check whether 1 tracing experiment is done or not in every 10 minutes
+            sleep 120 # check whether 1 tracing experiment is done or not in every 2 minutes
         done
+        echo "GPU: $gpu, Data: $data_path done"
     done
 done

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-./kill_container.sh
-./kill_training.sh
-./kill_traces.sh
-tmux kill-session -t imseg_experiments
+sudo ./kill_container.sh
+sudo ./kill_training.sh
+sudo ./kill_traces.sh
+# clear previous results
+tmux kill-session -t imseg
