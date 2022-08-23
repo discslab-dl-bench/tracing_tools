@@ -20,7 +20,7 @@ BEGIN
 //     const char * buf;
 //     size_t count
 tracepoint:syscalls:sys_enter_write
-/ comm == "python" /
+/ comm == "python3" /
 {
 	@write_start[tid] = nsecs;
 	@write_fd[tid] = args->fd; 
@@ -42,10 +42,10 @@ tracepoint:syscalls:sys_exit_write
 	$now = nsecs;
 	$latency = $now - @write_start[tid];
 
-	printf("%-17lu %-6d %-4d 0x%-13lx %-8d %-10d ", 
+	printf("%-17lu %-6d %s 0x%-13lx %-8d %-10d ", 
 		$now,
 		pid,
-		@write_fd[tid],
+		comm,
 		@write_address[tid],
 		@write_offset[tid],
 		@write_requested[tid]

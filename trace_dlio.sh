@@ -1,11 +1,6 @@
 #!/bin/bash
 
-# This script will launch and trace the BERT language model workload
-# gathering and zipping the traces at the end.  
-
-# CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
-# TODO: Find a better way to do this
-# cd /tracing_tools
+# This script will launch and trace DLIO.
 
 if [ "${EUID:-$(id -u)}" -ne 0 ]
 then
@@ -13,20 +8,19 @@ then
 	exit -1
 fi
 
-if [ $# -lt 3 ]
+if [ $# -lt 2 ]
 then
-	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
+	echo "Usage: $0 <workload_dir> <output_dir> (<experiment_name>)"
 	exit 1
 fi
 
 workload_dir=$1
 output_dir=$2
-num_gpus=$3
 
 # Get the optional 4th argument
-if [ $# -eq 4 ]
+if [ $# -eq 3 ]
 then	
-	exp_name="${4}"
+	exp_name="${3}"
 else
 	exp_name="experiment"
 fi
@@ -36,15 +30,6 @@ fi
 # Fix given paths i.e. remove trailing or extra slashes
 workload_dir=$(realpath -s  --canonicalize-missing $workload_dir)
 output_dir=$(realpath -s  --canonicalize-missing $output_dir)
-
-# Ensure num_gpus is numeric
-re='^[0-9]+$'
-if ! [[ $num_gpus =~ $re ]] ; then
-   echo "Error: '$num_gpus' is not a number. <num_gpus> must be a number." >&2
-   echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
-   exit 1
-fi
-
 
 # Create the output directory
 exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
@@ -62,19 +47,12 @@ echo 3 > /proc/sys/vm/drop_caches
 
 sleep 5
 
-# Delete previous app log if it exists
-if [ "$(ls ${output_dir}/results)" ]
-then
-	echo "Deleting old app log and casefile logs"
-	rm ${output_dir}/results/*
-fi
-
 echo "Starting traces"
 # Kill the tmux session from a previous run if it exists
-tmux kill-session -t training 2>/dev/null
+tmux kill-session -t dlio_tracing 2>/dev/null
 
 # Start a new tmux session from which we will run training
-tmux new-session -d -s training
+tmux new-session -d -s dlio_tracing
 
 # Start the bpf traces, storing their pid
 bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
@@ -95,9 +73,6 @@ trace_openat_pid=$!
 bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-# bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
-# trace_mmap_pid=$!
-
 # Start time alignment trace
 bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
 trace_time_align_pid=$!
@@ -110,9 +85,9 @@ trace_cpu_pid=$!
 nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		
 trace_gpu_pid=$!
 
-echo "Starting training"
+echo "Starting DLIO in the dlio_training tmux session"
 # Start training within the tmux session. 
-tmux send-keys -t training "sudo ${workload_dir}/start_training.sh" C-m
+tmux send-keys -t dlio_tracing "sudo ${workload_dir}/start_dlio.sh" C-m
 
 # Get the system-wide PID of the root process ID in the container (bash)
 root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
@@ -161,7 +136,6 @@ kill $trace_write_pid
 kill $trace_create_del_pid
 kill $trace_openat_pid
 kill $trace_close_pid
-# kill $trace_mmap_pid
 kill $trace_cpu_pid
 kill $trace_gpu_pid
 
