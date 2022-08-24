@@ -6,7 +6,7 @@ gpus=(8 4 2 1)
 # new data paths:
 # 1. "/data/kits19/preprocessed_data"
 # 2. "/raid/data/unet/augmentation/data_Sharpening_preprocess"
-data_paths=("/raid/data/unet/augmentation/data_Sharpening_preprocess") # edit this for more paths
+data_paths=("/raid/data/unet/augmentation/data_Sharpening_preprocess" "/data/kits19/preprocessed_data") # edit this for more paths
 
 for data_path in ${data_paths[@]}; do
     data_name=$(echo ${data_path} | awk -F "/" '{print $NF}')
