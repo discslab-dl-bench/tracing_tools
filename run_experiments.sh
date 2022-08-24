@@ -2,8 +2,7 @@
 workload_dir="/dl-bench/ruoyudeng/mlcomns_imseg"
 output_dir="/dl-bench/ruoyudeng/tracing_tools/trace_results"
 gpus=(8 4 2 1)
-# gpus=(4)
-data_paths=("/data/kits19/preprocessed_data/")
+data_paths=("/data/kits19/preprocessed_data/") # edit this for more paths
 
 for data_path in ${data_paths[@]}; do
     for gpu in ${gpus[@]}; do

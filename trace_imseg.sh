@@ -134,7 +134,7 @@ trace_gpu_pid=$!
 
 
 # Start training within the tmux session. 
-tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus $exp_name $data_path" C-m
+tmux send-keys -t training "sudo bash ${workload_dir}/start_training.sh $num_gpus $exp_name $data_path" C-m
 # tmux send-keys -t training "sudo ${workload_dir}/start_training.sh $num_gpus" C-m
 # tmux send-keys -t testing "python -c "for i in range(1000000): print(i)"" C-m
 sleep 1
