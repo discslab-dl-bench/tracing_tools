@@ -3,7 +3,8 @@ workload_dir="/dl-bench/ruoyudeng/mlcomns_imseg"
 output_dir="/dl-bench/ruoyudeng/tracing_tools/trace_results"
 
 # number of gpus to use
-gpus=(8 4 2 1)
+gpus=(8)
+# gpus=(8 4 2 1)
 
 # new data paths:
 # 1. "/data/kits19/preprocessed_data"
@@ -27,8 +28,12 @@ for data_path in ${data_paths[@]}; do
         while kill -0 "$training_pid"; do
             sleep 120 # check whether 1 tracing experiment is done or not in every 2 minutes
         done
-        echo "GPU: $gpu, Data: $data_path done"
     done
+    all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
+    end=$(date +%s)
+    time_insec=$(( $end - $start ))
+    echo -e "Experiments using GPUs: (${all_gpus}) with ${data_path} took: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n"
+    >> experiments_time_records
 done
 
 # keep a records of how long it took for the script to run
@@ -37,5 +42,5 @@ time_insec=$(( $end - $start ))
 exp_count=$((${#gpus[@]} * ${#data_paths[@]}))
 all_datasets=$(echo "${data_paths[*]}" | awk '$1=$1' FS=" " OFS="\n") # replace field seperator from space to AND for clear visualization
 all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
-echo -e "Ran ${exp_count} experiments with gpus:(${all_gpus}) and datasets: \n${all_datasets} \nin: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n" >> experiments_time_records
+echo -e "Ran ${exp_count} experiments with gpus:(${all_gpus}) and datasets: \n${all_datasets} \nin: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
 

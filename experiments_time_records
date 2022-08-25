@@ -1,0 +1,10 @@
+Ran 8 experiments with gpus:(8,4,2,1) and datasets: 
+/raid/data/unet/augmentation/data_Sharpening_preprocess
+/data/kits19/preprocessed_data 
+in: 3hrs 26min 0sec
+
+Ran 2 experiments with gpus:(8) and datasets: 
+/raid/data/unet/augmentation/data_Sharpening_preprocess
+/data/kits19/preprocessed_data 
+in: 0hrs 24min 0sec
+

@@ -1,9 +1,9 @@
 # data loading speed (depends on cpu resources)
-NUM_WORKERS=8 
+NUM_WORKERS=0 # can not plot correctly with NUM_WORKERS>0 
 
 # evaluation frequency (I/O to disk)
-START_EVAL_AT=20 
-EVALUATE_EVERY=2
+START_EVAL_AT=15 
+EVALUATE_EVERY=4
 
 # training time and warm up time
 MAX_EPOCHS=40
