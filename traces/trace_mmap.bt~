@@ -82,7 +82,7 @@ tracepoint:syscalls:sys_exit_mmap
 //     unsigned long addr;
 //     size_t len;
 tracepoint:syscalls:sys_enter_munmap
-/ comm == "python3" || comm == "python" /
+/ comm == "python" /
 {
 	@mun_start[tid] = nsecs;
 	@mun_addr[tid] = args->addr;

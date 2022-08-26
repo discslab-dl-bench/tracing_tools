@@ -120,10 +120,10 @@ tmux send-keys -t training "sudo ${workload_dir}/start_training.sh -g ${num_gpus
 sleep 5 
 
 # Get the system-wide PID of the root process ID in the container (bash)
-getPid
+getPid()
 
 # If the previous command did not work (sometimes we must wait a bit), retry in a loop
-while [[ $root_pid -eq -1 ]]
+while [ $root_pid -eq -1 ]
 do
 	echo "failed to get training pid, trying again"
 	sleep 1
