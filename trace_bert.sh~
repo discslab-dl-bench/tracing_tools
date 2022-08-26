@@ -9,30 +9,46 @@ getPid () {
 	echo "root pid: \"$root_pid\""
 }
 
+usage () {
+	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <amt_memory> <dataset_size> (<experiment_name>)"
+	exit 1
+}
+
 if [ "${EUID:-$(id -u)}" -ne 0 ]
 then
 	echo "Run script as root"
 	exit -1
 fi
 
-if [ $# -lt 3 ]
+if [ $# -lt 5 ]
 then
-	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
-	exit 1
+		usage
 fi
 
 workload_dir=$1
 output_dir=$2
 num_gpus=$3
+amt_memory=$4
+dataset_size=$5
 root_pid=-1
 
 # Get the optional 4th argument
-if [ $# -eq 4 ]
+if [ $# -eq 6 ]
 then	
 	exp_name="${4}"
 else
 	exp_name="experiment"
 fi
+
+
+if [ -d /raid/data/bert/train-data/${dataset_size} ]
+then
+		echo "You not run properly bad man"
+		exit -2
+fi
+
+
+data_dir="/raid/data/bert/train-data/${dataset_size}"
 
 # Argument validation
 
@@ -44,8 +60,7 @@ output_dir=$(realpath -s  --canonicalize-missing $output_dir)
 re='^[0-9]+$'
 if ! [[ $num_gpus =~ $re ]] ; then
    echo "Error: '$num_gpus' is not a number. <num_gpus> must be a number." >&2
-   echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
-   exit 1
+   usage
 fi
 
 
@@ -115,15 +130,15 @@ trace_gpu_pid=$!
 
 echo "Starting training"
 # Start training within the tmux session. 
-tmux send-keys -t training "sudo ${workload_dir}/start_training.sh -g ${num_gpus}" C-m
+tmux send-keys -t training "sudo ${workload_dir}/start_training.sh -g ${num_gpus} -r 1 -m ${amt_memory} -d ${data_dir}" C-m
 
 sleep 5 
 
 # Get the system-wide PID of the root process ID in the container (bash)
-getPid()
+getPid
 
 # If the previous command did not work (sometimes we must wait a bit), retry in a loop
-while [ $root_pid -eq -1 ]
+while [[ $root_pid -eq -1 ]]
 do
 	echo "failed to get training pid, trying again"
 	sleep 1
