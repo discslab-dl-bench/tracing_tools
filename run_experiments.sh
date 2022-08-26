@@ -3,8 +3,8 @@ workload_dir="/dl-bench/ruoyudeng/mlcomns_imseg"
 output_dir="/dl-bench/ruoyudeng/tracing_tools/trace_results"
 
 # number of gpus to use
-gpus=(8)
-# gpus=(8 4 2 1)
+# gpus=(8)
+gpus=(8 4 2 1)
 
 # new data paths:
 # 1. "/data/kits19/preprocessed_data"
@@ -19,6 +19,7 @@ for data_path in ${data_paths[@]}; do
         data_name="data_Baseline_preprocess"
     fi
     data_name=$(echo ${data_name} | awk -F "_" '{print $2}')
+    start_loop=$(date +%s)
     for gpu in ${gpus[@]}; do
         # run 1 tracing experiment
         exp_name="${gpu}gpu_${data_name}"
@@ -30,10 +31,9 @@ for data_path in ${data_paths[@]}; do
         done
     done
     all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
-    end=$(date +%s)
-    time_insec=$(( $end - $start ))
-    echo -e "Experiments using GPUs: (${all_gpus}) with ${data_path} took: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n"
-    >> experiments_time_records
+    end_loop=$(date +%s)
+    time_insec=$(( $end_loop - $start_loop ))
+    echo -e "Experiments using GPUs: (${all_gpus}) with ${data_path} took: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec" >> experiments_time_records
 done
 
 # keep a records of how long it took for the script to run
