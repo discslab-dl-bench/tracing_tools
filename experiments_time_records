@@ -24,3 +24,11 @@ Ran 8 experiments with gpus:(8,4,2,1) and datasets:
 in: 6hrs 52min 0sec
 
 
+Experiments using GPUs: (8,4,2,1) with /raid/data/unet/augmentation/data_Sharpening_preprocess took: 4hrs 10min 0sec
+Experiments using GPUs: (8,4,2,1) with /data/kits19/preprocessed_data took: 8hrs 56min 0sec
+Ran 8 experiments with gpus:(8,4,2,1) and datasets: 
+/raid/data/unet/augmentation/data_Sharpening_preprocess
+/data/kits19/preprocessed_data 
+in: 13hrs 6min 0sec
+
+
