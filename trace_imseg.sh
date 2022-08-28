@@ -3,11 +3,7 @@
 # This script will launch and trace the image segmentation workload
 # gathering and zipping the traces at the end.  
 
-# CHANGE THIS TO THE ACTUAL LOCATION OF THIS FILE
-# TODO: Find a better way to do this
-cd /tracing_tools
-
-if [ "${EUID:-$(id -u)}" -ne 0 ]
+if [ "${EUID:-$(id -u)}" -ne 0 ]	
 then
 	echo "Run script as root"
 	exit -1
@@ -65,17 +61,16 @@ sleep 5
 # Delete previous app log if it exists
 if [ "$(ls ${workload_dir}/results)" ]
 then
-	echo "Deleting old app log and casefile logs"
+	echo "Deleting old app log and casefile logs if they exist"
 	rm ${workload_dir}/results/*
 fi
 
 # Delete previous checkpoint file(s) if it (they) exists
 if [ "$(ls ${workload_dir}/ckpts)" ]
 then
-	echo "Deleting old checkpoint files"
+	echo "Deleting old checkpoint files is they exist"
 	rm ${workload_dir}/ckpts/*
 fi
-
 
 # Kill the tmux session from a previous run if it exists
 tmux kill-session -t training 2>/dev/null
@@ -102,9 +97,6 @@ trace_openat_pid=$!
 bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
-trace_mmap_pid=$!
-
 # Start time alignment trace
 bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
 trace_time_align_pid=$!
@@ -122,17 +114,41 @@ tmux send-keys -t training "${workload_dir}/start_training.sh $num_gpus" C-m
 
 sleep 1
 
-# Get the system-wide PID of the root process ID in the container (bash)
+# Get the system-wide PID of the root process ID in the container (usually bash)
 root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
-echo "root pid: \"$root_pid\""
 
-# If the previous command did not work (sometimes we must wait a bit), retry in a loop
+# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
+if [[ "$root_pid" =~ $'\n' ]]
+then 
+	echo "Multiple docker containers running at the same time."
+	echo "This could interfere with your tracing - or your tracing could interfere with others!"
+	echo "Please check the calendar reservations if someone has reserved the server for experiments."
+	echo -e "Run 'sudo docker ps' to list the other containers. Output of the command is printed below:\n"
+	sudo docker ps
+
+	echo "Knowing this, do you wish to keep going?"
+	select yn in "y" "n"; do
+		case $yn in
+			y ) break;;
+			n ) exit;;	
+		esac
+	done
+
+	# We've kept going
+	# Check the docker containers for the correct one. SPECIFIC TO IMAGE SEGMENTATION.
+	# Note, this might fail if multiple of the image segmentation are running under different names
+	for pid in ${root_pid}; do { if [[ "$(ps -p $pid -o args)" =~ $'run_and_time.sh' ]]; then echo "$pid match"; fi }; done
+fi
+
+echo "Root pid: \"$root_pid\""
+
+# If the previous command did not work (sometimes we must wait a bit), retry in a loop until we get the root pid
 while [ -z "$root_pid" ]
 do
-	echo "failed to get training pid, trying again"
+	echo "Failed to get training pid, trying again"
 	sleep 1
 	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
-	echo "new try: $root_pid"
+	echo "New try: $root_pid"
 done
 
 # Attach the syscall trace to the root_process 
@@ -168,7 +184,6 @@ kill $trace_write_pid
 kill $trace_create_del_pid
 kill $trace_openat_pid
 kill $trace_close_pid
-kill $trace_mmap_pid
 kill $trace_cpu_pid
 kill $trace_gpu_pid
 
