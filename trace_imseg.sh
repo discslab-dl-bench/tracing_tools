@@ -120,25 +120,31 @@ root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /d
 # Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 if [[ "$root_pid" =~ $'\n' ]]
 then 
-	echo "Multiple docker containers running at the same time."
+	echo -e "\nMultiple docker containers are running at the same time."
 	echo "This could interfere with your tracing - or your tracing could interfere with others!"
-	echo "Please check the calendar reservations if someone has reserved the server for experiments."
-	echo -e "Run 'sudo docker ps' to list the other containers. Output of the command is printed below:\n"
+	echo "Please check the calendar reservations, someone might have reserved the server for experiments."
+	echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'" 
+	echo -e "Output of 'sudo docker ps' is printed below:\n"
 	sudo docker ps
 
-	echo "Knowing this, do you wish to keep going?"
-	select yn in "y" "n"; do
-		case $yn in
-			y ) break;;
-			n ) exit;;	
-		esac
-	done
+	echo -e "\nShutting down."
 
-	# We've kept going
-	# Check the docker containers for the correct one. SPECIFIC TO IMAGE SEGMENTATION.
-	# Note, this might fail if multiple of the image segmentation are running under different names
-	for pid in ${root_pid}; do { if [[ "$(ps -p $pid -o args)" =~ $'run_and_time.sh' ]]; then echo "$pid match"; fi }; done
+	# Kill the training process and the traces
+	# if using strace, it was stopped when root_pid ended
+	docker kill training
+	docker rm training
+	kill $trace_bio_pid
+	kill $trace_read_pid
+	kill $trace_write_pid
+	kill $trace_create_del_pid
+	kill $trace_openat_pid
+	kill $trace_close_pid
+	kill $trace_cpu_pid
+	kill $trace_gpu_pid
+
+	exit 0
 fi
+
 
 echo "Root pid: \"$root_pid\""
 
@@ -168,6 +174,9 @@ kill $trace_time_align_pid
 echo "Now waiting until training completion"
 
 # Now wait until training finishes
+# TODO: Replace this with 
+# status_code="$(sudo docker container wait training)"
+
 while kill -0 "$root_pid"; do
 	sleep 5
 done
