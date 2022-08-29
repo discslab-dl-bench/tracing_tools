@@ -62,10 +62,10 @@ main() {
 	amt_memory=$4
 	dataset_size=$5
 
-	# Get the optional 4th argument
+	# Get the optional 6th argument
 	if [ $# -eq 6 ]
 	then	
-		exp_name="${4}"
+		exp_name="${6}"
 	else
 		exp_name="experiment"
 	fi
@@ -108,6 +108,9 @@ main() {
 	fi
 
 	echo "Starting traces"
+	# Kill the tmux session from a previous run if it exists
+	tmux kill-session -t train_bert 2>/dev/null
+	
 	# Start a new tmux session from which we will run training
 	tmux new-session -d -s train_bert
 
@@ -215,3 +218,8 @@ main() {
 	# # Archive the traces
 	# output_parent_dir="$(dirname "$output_dir")"
 	tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
+
+	exit 0
+}
+
+main $@
