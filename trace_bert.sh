@@ -40,15 +40,15 @@ else
 	exp_name="experiment"
 fi
 
+# Update parth to train-data
+data_dir="/raid/data/bert/preproc_data/${dataset_size}/"
 
-if [ -d /raid/data/bert/train-data/${dataset_size} ]
+if [[ ! -d "${data_dir}" ]]
 then
 		echo "You not run properly bad man"
 		exit -2
 fi
 
-
-data_dir="/raid/data/bert/train-data/${dataset_size}"
 
 # Argument validation
 
