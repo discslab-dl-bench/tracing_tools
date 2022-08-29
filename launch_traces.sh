@@ -66,9 +66,6 @@ trace_openat_pid=$!
 bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
 trace_close_pid=$!
 
-bpftrace traces/trace_mmap.bt -o ${output_dir}/trace_mmap.out &
-trace_mmap_pid=$!
-
 # Start time alignment trace
 bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
 trace_time_align_pid=$!
@@ -104,7 +101,6 @@ kill $trace_write_pid
 kill $trace_create_del_pid
 kill $trace_openat_pid
 kill $trace_close_pid
-kill $trace_mmap_pid
 kill $trace_cpu_pid
 kill $trace_gpu_pid
 

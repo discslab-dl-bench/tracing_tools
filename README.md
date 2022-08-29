@@ -9,7 +9,6 @@ There are a few traces under `traces/`:
 - `trace_bio.bt` records block level reads and writes 
 - `trace_close.bt` records files closing 
 - `trace_create_del.bt` records files being created and deleted
-- `trace_mmap.bt` records mmap-ing activity
 - `trace_openat.bt` records file openings
 - `trace_read.bt` records file system reads - when programs issue read() system calls
 - `trace_time_align.bt` is a special trace used to map the timestamps given by `bpftrace` to UTC timestamps for plotting.

@@ -25,7 +25,7 @@ BEGIN
 //     const char * pathname;
 //     umode_t mode;				(unsigned short)
 tracepoint:syscalls:sys_enter_mkdir
-/ comm == "python3" || comm == "python" /
+/ comm == "python" /
 {
 	@mkdir_start[tid] = nsecs;
 	@mkdir_path[tid] = str(args->pathname);
@@ -59,7 +59,7 @@ tracepoint:syscalls:sys_exit_mkdir
 //     int __syscall_nr;
 //     const char * pathname;
 tracepoint:syscalls:sys_enter_rmdir
-/  comm == "python3" || comm == "python" /
+/ comm == "python" /
 {
 	@rmdir_start[tid] = nsecs;
 	@rmdir_path[tid] = str(args->pathname);
@@ -89,7 +89,7 @@ tracepoint:syscalls:sys_exit_rmdir
 //     int __syscall_nr;
 //     const char * pathname;
 tracepoint:syscalls:sys_enter_unlink
-/ comm == "python3" || comm == "python" /
+/ comm == "python" /
 {
 	@unlnk_start[tid] = nsecs;
 	@unlnk_fullpath[tid] = str(args->pathname);
@@ -133,7 +133,7 @@ tracepoint:syscalls:sys_enter_unlink
 // Note: I have never seen create() being called
 // It seems usually openat() with O_CREAT is called instead of it
 tracepoint:syscalls:sys_enter_creat
-/ comm == "python3" || comm == "python" /
+/ comm == "python" /
 {
 	printf("%-17lu %-6d %-6d %-10s %-5hu %s\n", 
 		nsecs, 
