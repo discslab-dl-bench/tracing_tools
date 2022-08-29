@@ -36,24 +36,24 @@ main() {
 		exit -1
 	fi
 
-if [ $# -lt 4 ]
-then
-	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <data_path> (<experiment_name>)"
-	exit 1
-fi
+	if [ $# -lt 4 ]
+	then
+		echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <data_path> (<experiment_name>)"
+		exit 1
+	fi
 
-workload_dir=$1
-output_dir=$2
-num_gpus=$3
-data_path=$4
+	workload_dir=$1
+	output_dir=$2
+	num_gpus=$3
+	data_path=$4
 
-# Get the optional 5th argument
-if [ $# -eq 5 ]
-then	
-	exp_name="${5}"
-else
-	exp_name="experiment"
-fi
+	# Get the optional 5th argument
+	if [ $# -eq 5 ]
+	then	
+		exp_name="${5}"
+	else
+		exp_name="experiment"
+	fi
 
 	# Argument validation
 
@@ -69,20 +69,18 @@ fi
 	exit 1
 	fi
 
-<<<<<<< HEAD
-workload_dir=$1
-output_dir=$2
-num_gpus=$3
-data_path=$4
+	workload_dir=$1
+	output_dir=$2
+	num_gpus=$3
+	data_path=$4
 
-# Get the optional 5th argument
-if [ $# -eq 5 ]
-then	
-	exp_name="${5}"
-else
-	exp_name="experiment"
-fi
-=======
+	# Get the optional 5th argument
+	if [ $# -eq 5 ]
+	then	
+		exp_name="${5}"
+	else
+		exp_name="experiment"
+	fi
 
 	# Create the output directory
 	exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
@@ -100,22 +98,37 @@ fi
 
 	sleep 5
 
-# Stroing results based on diff exp_name
-result_dir="${workload_dir}/results/${exp_name}/results"
-if [ ! -d $result_dir ]
-then
+	# Delete previous app log if it exists
+	if [ "$(ls ${workload_dir}/results)" ]
+	then
+		echo "Deleting old app log and casefile logs"
+		rm ${workload_dir}/results/*
+	fi
 
-	echo "Creating directory to store results in: ${result_dir}"
-	mkdir -p $result_dir
-fi
+	# Delete previous checkpoint file(s) if it (they) exists
+	if [ "$(ls ${workload_dir}/ckpts)" ]
+	then
+		echo "Deleting old checkpoint files"
+		rm ${workload_dir}/ckpts/*
+	fi
+
+	# Stroing results based on diff exp_name
+	result_dir="${workload_dir}/results/${exp_name}/results"
+	if [ ! -d $result_dir ]
+	then
+
+		echo "Creating directory to store results in: ${result_dir}"
+		mkdir -p $result_dir
+	fi
 
 
-ckpts_dir="${workload_dir}/ckpts/${exp_name}/ckpts"
-if [ ! -d $ckpts_dir ]
-then
-	echo "Creating directory to store ckpts in: ${ckpts_dir}"
-	mkdir -p $ckpts_dir
-fi
+	ckpts_dir="${workload_dir}/ckpts/${exp_name}/ckpts"
+	if [ ! -d $ckpts_dir ]
+	then
+		echo "Creating directory to store ckpts in: ${ckpts_dir}"
+		mkdir -p $ckpts_dir
+	fi
+
 
 	# Kill the tmux session from a previous run if it exists
 	tmux kill-session -t train_imseg 2>/dev/null
@@ -132,7 +145,6 @@ fi
 
 	bpftrace traces/trace_write.bt -o ${output_dir}/trace_write.out &
 	trace_write_pid=$!
->>>>>>> 03ed1da7428ea041490c92dc77ec6eb498236f04
 
 	bpftrace traces/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 	trace_create_del_pid=$!
@@ -161,9 +173,8 @@ fi
 	sleep 1
 
 	# Get the system-wide PID of the root process ID in the container (usually bash)
-# added: only want 1 root pid: awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}'
-	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}' | awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}')
-echo $root_pid
+	# added: only want 1 root pid: awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}'
+	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
 
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
@@ -202,7 +213,6 @@ echo $root_pid
 
 	# Sleep a bit to let training spawn all workers
 	sleep 120
->>>>>>> 03ed1da7428ea041490c92dc77ec6eb498236f04
 
 	echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 	# Save PID/TID map for later reference
@@ -226,12 +236,12 @@ echo $root_pid
 
 	terminate_traces
 
-# Copy the application log and casefile logs to the results directory
-cp ${result_dir}/* $output_dir
+	# Copy the application log and casefile logs to the results directory
+	cp ${result_dir}/* $output_dir
 
 	# Copy the ckpt file to the results directory
 	cp ${ckpts_dir}/ckpt_* $output_dir
-sleep 5 # give some time for copying to happen
+	sleep 5 # give some time for copying to happen
 	# Archive the traces
 	output_parent_dir="$(dirname "$output_dir")"
 	tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
