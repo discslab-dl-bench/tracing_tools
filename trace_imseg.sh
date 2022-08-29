@@ -215,5 +215,5 @@ main() {
 	exit 0
 }
 
-# Call the main function
-main
+# Call the main function with all arguments
+main $@
