@@ -3,6 +3,28 @@
 # This script will launch and trace the image segmentation workload
 # gathering and zipping the traces at the end.  
 
+# Helper function to terminate training and clean up behind us
+terminate_traces() {
+	# Kill the training process and the traces
+	# if using strace, it was stopped when root_pid ended
+	./kill_training.sh
+	kill $trace_bio_pid
+	kill $trace_read_pid
+	kill $trace_write_pid
+	kill $trace_create_del_pid
+	kill $trace_openat_pid
+	kill $trace_close_pid
+	kill $trace_cpu_pid
+	kill $trace_gpu_pid
+
+	# Kill any remaining traces that didn't get killed above
+	remaining_traces=$(ps | grep bpf | awk '{print $1}')
+	for proc in $remaining_traces; 
+	do	
+		kill $proc
+	done
+}
+
 if [ "${EUID:-$(id -u)}" -ne 0 ]	
 then
 	echo "Run script as root"
@@ -129,18 +151,7 @@ then
 
 	echo -e "\nShutting down."
 
-	# Kill the training process and the traces
-	# if using strace, it was stopped when root_pid ended
-	docker kill training
-	docker rm training
-	kill $trace_bio_pid
-	kill $trace_read_pid
-	kill $trace_write_pid
-	kill $trace_create_del_pid
-	kill $trace_openat_pid
-	kill $trace_close_pid
-	kill $trace_cpu_pid
-	kill $trace_gpu_pid
+	terminate_traces
 
 	exit 0
 fi
@@ -184,24 +195,7 @@ done
 # Sleep a bit more once training stops to capture full shutting down
 sleep 10
 
-# Kill the training process and the traces
-# if using strace, it was stopped when root_pid ended
-./kill_training.sh
-kill $trace_bio_pid
-kill $trace_read_pid
-kill $trace_write_pid
-kill $trace_create_del_pid
-kill $trace_openat_pid
-kill $trace_close_pid
-kill $trace_cpu_pid
-kill $trace_gpu_pid
-
-# Kill any remaining traces that didn't get killed above
-remaining_traces=$(ps | grep bpf | awk '{print $1}')
-for proc in $remaining_traces; 
-do	
-	kill $proc
-done
+terminate_traces
 
 # Copy the application log and casefile logs to the results directory
 cp ${workload_dir}/results/* $output_dir
