@@ -7,7 +7,10 @@
 terminate_traces() {
 	# Kill the training process and the traces
 	# if using strace, it was stopped when root_pid ended
-	./kill_training.sh
+	docker kill dlio_tracing
+	docker rm dlio_tracing
+	tmux kill-session -t dlio_tracing
+
 	kill $trace_bio_pid
 	kill $trace_read_pid
 	kill $trace_write_pid
@@ -137,7 +140,7 @@ main() {
 		exit 0
 	fi
 
-	
+
 	echo "root pid: \"$root_pid\""
 
 	# If the previous command did not work (sometimes we must wait a bit), retry in a loop

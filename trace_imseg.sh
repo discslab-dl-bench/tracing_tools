@@ -8,7 +8,10 @@
 terminate_traces() {
 	# Kill the training process and the traces
 	# if using strace, it was stopped when root_pid ended
-	./kill_training.sh
+	docker kill train_imseg
+	docker rm train_imseg
+	tmux kill-session -t train_imseg
+
 	kill $trace_bio_pid
 	kill $trace_read_pid
 	kill $trace_write_pid
@@ -97,10 +100,10 @@ main() {
 	fi
 
 	# Kill the tmux session from a previous run if it exists
-	tmux kill-session -t training 2>/dev/null
+	tmux kill-session -t train_imseg 2>/dev/null
 
 	# Start a new tmux session from which we will run training
-	tmux new-session -d -s training
+	tmux new-session -d -s train_imseg
 
 	# Start the bpf traces, storing their pid
 	bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
@@ -134,7 +137,7 @@ main() {
 
 
 	# Start training within the tmux session. 
-	tmux send-keys -t training "${workload_dir}/start_training.sh $num_gpus" C-m
+	tmux send-keys -t train_imseg "${workload_dir}/start_training.sh $num_gpus" C-m
 
 	sleep 1
 
@@ -153,7 +156,6 @@ main() {
 		echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'" 
 		echo -e "Output of 'sudo docker ps' is printed below:\n"
 		sudo docker ps
-
 		echo -e "\nShutting down."
 
 		terminate_traces
@@ -191,7 +193,7 @@ main() {
 
 	# Now wait until training finishes
 	# TODO: Replace this with 
-	# status_code="$(sudo docker container wait training)"
+	# status_code="$(sudo docker container wait train_imseg)"
 
 	while kill -0 "$root_pid"; do
 		sleep 5

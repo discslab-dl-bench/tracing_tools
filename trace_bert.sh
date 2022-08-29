@@ -7,7 +7,10 @@
 terminate_traces() {
 	# Kill the training process and the traces
 	# if using strace, it was stopped when root_pid ended
-	./kill_training.sh
+	docker kill train_bert
+	docker rm train_bert
+	tmux kill-session -t train_bert
+
 	kill $trace_bio_pid
 	kill $trace_read_pid
 	kill $trace_write_pid
@@ -91,10 +94,10 @@ main() {
 
 	echo "Starting traces"
 	# Kill the tmux session from a previous run if it exists
-	tmux kill-session -t training 2>/dev/null
+	tmux kill-session -t train_bert 2>/dev/null
 
 	# Start a new tmux session from which we will run training
-	tmux new-session -d -s training
+	tmux new-session -d -s train_bert
 
 	# Start the bpf traces, storing their pid
 	bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
@@ -129,11 +132,11 @@ main() {
 
 	echo "Starting training"
 	# Start training within the tmux session. 
-	tmux send-keys -t training "sudo ${workload_dir}/start_training.sh" C-m
+	tmux send-keys -t train_bert "sudo ${workload_dir}/start_training.sh" C-m
 
 	# Get the system-wide PID of the root process ID in the container (bash)
 	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
-	
+
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
 	then
@@ -167,7 +170,7 @@ main() {
 
 	# Attach the syscall trace to the root_process 
 	# It will automatically attach to all spawned child processes
-	strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+	#strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
 
 	# Sleep a bit to let training spawn all workers
 	sleep 120
