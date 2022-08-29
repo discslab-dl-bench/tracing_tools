@@ -143,8 +143,11 @@ main() {
 
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
-	then 
-		echo -e "\nMultiple docker containers are running at the same time."
+	then
+		RED='\033[0;31m'
+		NC='\033[0m' # No Color
+		echo -e "${RED}WARNING:${NC}"
+		echo "Multiple docker containers are running at the same time."
 		echo "This could interfere with your tracing - or your tracing could interfere with others!"
 		echo "Please check the calendar reservations, someone might have reserved the server for experiments."
 		echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'" 
@@ -212,4 +215,5 @@ main() {
 	exit 0
 }
 
+# Call the main function
 main
