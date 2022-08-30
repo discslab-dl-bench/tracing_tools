@@ -4,8 +4,7 @@
 # gathering and zipping the traces at the end.
 
 getPidOld () {
-	root_pid=( $(ps ax | grep 'bin/bash train_model.sh [1-8]' | grep -wv 'docker' | awk '{print $1}') )
-	echo "root pid: \"$root_pid\""
+	echo $(ps ax | grep 'bin/bash train_model.sh [1-8]' | grep -wv 'docker' | awk '{print $1}') 
 }
 
 getPid () {
@@ -145,14 +144,12 @@ main() {
 	nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		
 	trace_gpu_pid=$!
 
-	#TODO Add dataset scaling
-
 	echo "Starting training"
 	# Start training within the tmux session. 
-	tmux send-keys -t train_bert "sudo ${workload_dir}/start_training.sh -r 1 -g ${num_gpus} -m ${amt_memory} -d /raid/data/bert/tmp" C-m
+	tmux send-keys -t train_bert "sudo ${workload_dir}/start_training.sh -r 1 -g ${num_gpus} -m ${amt_memory}-d /raid/data/bert/training_sets/${dataset_size}" C-m
 
 	# Get the system-wide PID of the root process ID in the container (bash)
-	root_pid=$(getPid)
+	root_pid=$(getPidOld)
 
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
@@ -181,7 +178,7 @@ main() {
 	do
 		echo "failed to get training pid, trying again"
 		sleep 1
-		root_pid=$(getPid)
+		root_pid=$(getPidOld)
 		echo "new try: $root_pid"
 	done
 
@@ -212,11 +209,17 @@ main() {
 
 	terminate_traces
 
-	# # Copy the application log to the results directory
-	cp ${workload_dir}/bert.log $output_dir
+	while [ ! -f ${workload_dir}/output/bert.log ] 
+	do
+		echo "Waiting for log to be generated"
+		sleep 2
+	done
 
-	# # Archive the traces
-	# output_parent_dir="$(dirname "$output_dir")"
+	# Copy the application log to the results directory
+	cp ${workload_dir}/output/bert.log $output_dir
+
+	# Archive the traces
+	output_parent_dir="$(dirname "$output_dir")"
 	tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
 
 	exit 0

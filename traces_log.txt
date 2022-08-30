@@ -1,0 +1,604 @@
+Running trace on 1 gpus, with dataset 16gb, and a memory restriction of -1
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3182333
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+train_bert
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_2/1gpu_16gb_20220829192742/trace_write.out
+Finished running scenario
+Running trace on 1 gpus, with dataset 200gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3259440
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_3/1gpu_200gb_20220829194555/trace_write.out
+Finished running scenario
+Running trace on 1 gpus, with dataset 256gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3270228
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_4/1gpu_256gb_20220829200424/trace_write.out
+Finished running scenario
+Running trace on 1 gpus, with dataset 500gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3279570
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_5/1gpu_500gb_20220829202255/trace_write.out
+Finished running scenario
+Running trace on 2 gpus, with dataset 16gb, and a memory restriction of -1
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3289892
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_6/2gpu_16gb_20220829204126/trace_write.out
+Finished running scenario
+Running trace on 2 gpus, with dataset 200gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3303310
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_7/2gpu_200gb_20220829210256/trace_write.out
+Finished running scenario
+Running trace on 2 gpus, with dataset 256gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3343202
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_8/2gpu_256gb_20220829212523/trace_write.out
+Finished running scenario
+Running trace on 2 gpus, with dataset 500gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3356336
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_9/2gpu_500gb_20220829214744/trace_write.out
+Finished running scenario
+Running trace on 4 gpus, with dataset 16gb, and a memory restriction of -1
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3370096
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_10/4gpu_16gb_20220829220924/trace_write.out
+Finished running scenario
+Running trace on 4 gpus, with dataset 200gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3383615
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_11/4gpu_200gb_20220829223513/trace_write.out
+Finished running scenario
+Running trace on 4 gpus, with dataset 256gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3396468
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_12/4gpu_256gb_20220829230133/trace_write.out
+Finished running scenario
+Running trace on 4 gpus, with dataset 500gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3409605
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_13/4gpu_500gb_20220829232736/trace_write.out
+Finished running scenario
+Running trace on 8 gpus, with dataset 16gb, and a memory restriction of -1
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3421534
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_14/8gpu_16gb_20220829235350/trace_write.out
+Finished running scenario
+Running trace on 8 gpus, with dataset 200gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3437292
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_15/8gpu_200gb_20220830003013/trace_write.out
+Finished running scenario
+Running trace on 8 gpus, with dataset 256gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3453385
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_16/8gpu_256gb_20220830010738/trace_write.out
+Finished running scenario
+Running trace on 8 gpus, with dataset 500gb, and a memory restriction of 256
+Creating /home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427
+Starting traces
+Starting training
+root pid: ""
+failed to get training pid, trying again
+new try: 
+failed to get training pid, trying again
+new try: 3469930
+Slept 120s, collecting PIDs/TIDs and time_alignment trace
+Now waiting until training completion
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/trace_read.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/trace_close.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/trace_create_del.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/gpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/trace_openat.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/trace_bio.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/pids.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/cpu.out
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/trace_time_align.out
+
+
+
+
+
+
+
+
+
+
+
+
+/home/2020/zdouce/COMP396/tracing_tools/trace_results/run_number_17/8gpu_500gb_20220830014427/trace_write.out
+Finished running scenario
+Finished running all scenarios
