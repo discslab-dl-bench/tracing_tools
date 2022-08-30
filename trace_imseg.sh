@@ -156,8 +156,9 @@ main() {
 
 	# Start training within the tmux session. 
 
-	size=$(echo $exp_name | awk -F "_" '{print $NF}')
-	if [ $size = "16GB" ]
+	# if size = 16GB, run the experiments without limit MEM
+	size=$(echo $exp_name | awk -F "_" '{print $3}')
+	if [ "$size" = "16GB" ]
 	then
 		tmux send-keys -t train_imseg "${workload_dir}/start_training.sh $num_gpus" C-m
 	else
