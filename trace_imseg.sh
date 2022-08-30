@@ -36,16 +36,16 @@ main() {
 		exit -1
 	fi
 
+	workload_dir=$1
+	output_dir=$2
+	num_gpus=$3
+	data_path=$4
+
 	if [ $# -lt 4 ]
 	then
 		echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <data_path> (<experiment_name>)"
 		exit 1
 	fi
-
-	workload_dir=$1
-	output_dir=$2
-	num_gpus=$3
-	data_path=$4
 
 	# Get the optional 5th argument
 	if [ $# -eq 5 ]
@@ -67,19 +67,6 @@ main() {
 	echo "Error: '$num_gpus' is not a number. <num_gpus> must be a number." >&2
 	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
 	exit 1
-	fi
-
-	workload_dir=$1
-	output_dir=$2
-	num_gpus=$3
-	data_path=$4
-
-	# Get the optional 5th argument
-	if [ $# -eq 5 ]
-	then	
-		exp_name="${5}"
-	else
-		exp_name="experiment"
 	fi
 
 	# Create the output directory
@@ -168,7 +155,14 @@ main() {
 
 
 	# Start training within the tmux session. 
-	tmux send-keys -t train_imseg "${workload_dir}/start_training.sh $num_gpus" C-m
+
+	size=$(echo $exp_name | awk -F "_" '{print $NF}')
+	if [ $size = "16GB" ]
+	then
+		tmux send-keys -t train_imseg "${workload_dir}/start_training.sh $num_gpus" C-m
+	else
+		tmux send-keys -t train_imseg "${workload_dir}/start_training_limmem.sh $num_gpus" C-m
+	fi
 
 	sleep 1
 
