@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script will launch and trace the image segmentation workload
-# gathering and zipping the traces at the end.  
+# gathering and zipping the traces at the end.
 
 
 # Helper function to terminate training and clean up behind us
@@ -23,14 +23,14 @@ terminate_traces() {
 
 	# Kill any remaining traces that didn't get killed above
 	remaining_traces=$(ps | grep bpftrace | awk '{print $1}')
-	for proc in $remaining_traces; 
-	do	
+	for proc in $remaining_traces;
+	do
 		kill $proc
 	done
 }
 
 main() {
-	if [ "${EUID:-$(id -u)}" -ne 0 ]	
+	if [ "${EUID:-$(id -u)}" -ne 0 ]
 	then
 		echo "Run script as root"
 		exit -1
@@ -40,20 +40,25 @@ main() {
 	output_dir=$2
 	num_gpus=$3
 	data_path=$4
+	dataset_size=$5
+	mem_size=$6
 
-	if [ $# -lt 4 ]
+	if [ $# -lt 6 ]
 	then
-		echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <data_path> (<experiment_name>)"
+		echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <data_path> <dataset_size> <memory_size> (<experiment_name>)"
 		exit 1
 	fi
 
-	# Get the optional 5th argument
-	if [ $# -eq 5 ]
-	then	
-		exp_name="${5}"
+
+	# Get the optional 6th argument
+	if [ $# -eq 7 ]
+	then
+		exp_name="${7}"
 	else
 		exp_name="experiment"
 	fi
+
+
 
 	# Argument validation
 
@@ -65,15 +70,15 @@ main() {
 	re='^[0-9]+$'
 	if ! [[ $num_gpus =~ $re ]] ; then
 	echo "Error: '$num_gpus' is not a number. <num_gpus> must be a number." >&2
-	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
+	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> <data_path> <dataset_size> <memory_size> (<experiment_name>)"
 	exit 1
 	fi
 
 	# Create the output directory
 	exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
-	output_dir="${output_dir}/${exp_name}/"
+	output_dir="${output_dir}/${exp_name}"
 
-	if [ ! -d $output_dir ] 
+	if [ ! -d $output_dir ]
 	then
 		echo "Creating $output_dir"
 		mkdir -p $output_dir
@@ -89,14 +94,14 @@ main() {
 	if [ "$(ls ${workload_dir}/results)" ]
 	then
 		echo "Deleting old app log and casefile logs"
-		rm ${workload_dir}/results/*
+		rm -rf ${workload_dir}/results/*
 	fi
 
 	# Delete previous checkpoint file(s) if it (they) exists
 	if [ "$(ls ${workload_dir}/ckpts)" ]
 	then
 		echo "Deleting old checkpoint files"
-		rm ${workload_dir}/ckpts/*
+		rm -rf ${workload_dir}/ckpts/*
 	fi
 
 	# Stroing results based on diff exp_name
@@ -154,22 +159,20 @@ main() {
 	trace_gpu_pid=$!
 
 
-	# Start training within the tmux session. 
+	# Start training within the tmux session.
 
-	# if size = 16GB, run the experiments without limit MEM
-	size=$(echo $exp_name | awk -F "_" '{print $3}')
-	if [ "$size" = "16GB" ]
-	then
-		tmux send-keys -t train_imseg "${workload_dir}/start_training.sh $num_gpus" C-m
-	else
-		tmux send-keys -t train_imseg "${workload_dir}/start_training_limmem.sh $num_gpus" C-m
-	fi
+	# if size = 16GB, run the experiments without limit dataset
+
+	# echo $num_gpus $exp_name $data_path $dataset_size
+	# ${workload_dir}/start_training.sh $num_gpus $exp_name $data_path $dataset_size $mem_size $workload_dir
+	tmux send-keys -t train_imseg "${workload_dir}/start_training.sh $num_gpus $exp_name $data_path $dataset_size $mem_size $workload_dir" C-m
 
 	sleep 1
 
 	# Get the system-wide PID of the root process ID in the container (usually bash)
 	# added: only want 1 root pid: awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}'
 	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
+	# root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}' | awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}')
 
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
@@ -180,7 +183,7 @@ main() {
 		echo "Multiple docker containers are running at the same time."
 		echo "This could interfere with your tracing - or your tracing could interfere with others!"
 		echo "Please check the calendar reservations, someone might have reserved the server for experiments."
-		echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'" 
+		echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'"
 		echo -e "Output of 'sudo docker ps' is printed below:\n"
 		sudo docker ps
 		echo -e "\nShutting down."
@@ -202,7 +205,7 @@ main() {
 		echo "New try: $root_pid"
 	done
 
-	# Attach the syscall trace to the root_process 
+	# Attach the syscall trace to the root_process
 	# It will automatically attach to all spawned child processes
 	#strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
 
@@ -211,7 +214,7 @@ main() {
 
 	echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 	# Save PID/TID map for later reference
-	ps aux -T | grep python > ${output_dir}/pids.out
+	ps aux -T | grep python | grep -wv vscode-server > ${output_dir}/pids.out
 
 	# Kill the time alignment trace early, 2min should be plenty
 	kill $trace_time_align_pid
@@ -219,7 +222,7 @@ main() {
 	echo "Now waiting until training completion"
 
 	# Now wait until training finishes
-	# TODO: Replace this with 
+	# TODO: Replace this with
 	# status_code="$(sudo docker container wait train_imseg)"
 
 	while kill -0 "$root_pid"; do
