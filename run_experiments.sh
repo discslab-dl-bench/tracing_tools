@@ -69,5 +69,5 @@ time_insec=$(( $end - $start ))
 exp_count=$((${#gpus[@]} * ${#data_paths[@]}))
 all_datasets=$(echo "${data_paths[*]}" | awk '$1=$1' FS=" " OFS="\n") # replace field seperator from space to AND for clear visualization
 all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
-echo -e "Ran ${exp_count} experiments with gpus:(${all_gpus}) and datasets: \n${all_datasets} \nin: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
+echo -e "Ran ${exp_count} experiments with gpus:(${all_gpus}) in: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
 
