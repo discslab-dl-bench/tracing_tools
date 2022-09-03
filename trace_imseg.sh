@@ -90,19 +90,19 @@ main() {
 
 	sleep 5
 
-	# Delete previous app log if it exists
-	if [ "$(ls ${workload_dir}/results)" ]
-	then
-		echo "Deleting old app log and casefile logs"
-		rm -rf ${workload_dir}/results/*
-	fi
+	# # Delete previous app log if it exists
+	# if [ "$(ls ${workload_dir}/results)" ]
+	# then
+	# 	echo "Deleting old app log and casefile logs"
+	# 	rm -rf ${workload_dir}/results/*
+	# fi
 
-	# Delete previous checkpoint file(s) if it (they) exists
-	if [ "$(ls ${workload_dir}/ckpts)" ]
-	then
-		echo "Deleting old checkpoint files"
-		rm -rf ${workload_dir}/ckpts/*
-	fi
+	# # Delete previous checkpoint file(s) if it (they) exists
+	# if [ "$(ls ${workload_dir}/ckpts)" ]
+	# then
+	# 	echo "Deleting old checkpoint files"
+	# 	rm -rf ${workload_dir}/ckpts/*
+	# fi
 
 	# Stroing results based on diff exp_name
 	result_dir="${workload_dir}/results/${exp_name}/results"
