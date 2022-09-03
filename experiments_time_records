@@ -1,42 +1,5 @@
-Ran 8 experiments with gpus:(8,4,2,1) and datasets: 
-/raid/data/unet/augmentation/data_Sharpening_preprocess
-/data/kits19/preprocessed_data 
-in: 3hrs 26min 0sec
+Experiments using GPUs: (8) with /raid/data/unet/original_dataset/Original_dataset_500GB, 256GB dataset took: 3hrs 4min 0sec
+Ran 1 experiments with gpus:(8) in: 3hrs 4min 0sec
 
-Ran 2 experiments with gpus:(8) and datasets: 
-/raid/data/unet/augmentation/data_Sharpening_preprocess
-/data/kits19/preprocessed_data 
-in: 0hrs 24min 0sec
-
-Ran 2 experiments with gpus:(8) and datasets: 
-/raid/data/unet/augmentation/data_Sharpening_preprocess
-/data/kits19/preprocessed_data 
-in: 0hrs 28min 1sec
-
-
-Experiments using GPUs: (8,4,2,1) with /raid/data/unet/augmentation/data_Sharpening_preprocess took: 2hrs 12min 0sec
-
-Experiments using GPUs: (8,4,2,1) with /data/kits19/preprocessed_data took: 6hrs 52min 0sec
-
-Ran 8 experiments with gpus:(8,4,2,1) and datasets: 
-/raid/data/unet/augmentation/data_Sharpening_preprocess
-/data/kits19/preprocessed_data 
-in: 6hrs 52min 0sec
-
-
-Experiments using GPUs: (8,4,2,1) with /raid/data/unet/augmentation/data_Sharpening_preprocess took: 4hrs 10min 0sec
-Experiments using GPUs: (8,4,2,1) with /data/kits19/preprocessed_data took: 8hrs 56min 0sec
-Ran 8 experiments with gpus:(8,4,2,1) and datasets: 
-/raid/data/unet/augmentation/data_Sharpening_preprocess
-/data/kits19/preprocessed_data 
-in: 13hrs 6min 0sec
-
-
-Experiments using GPUs: (8,4,2,1) with /raid/data/unet/augmentation/data_Sharpening_preprocess took: 1hrs 52min 0sec
-Experiments using GPUs: (8,4,2,1) with /data/kits19/preprocessed_data took: 4hrs 0min 0sec
-Ran 8 experiments with gpus:(8,4,2,1) and datasets: 
-/raid/data/unet/augmentation/data_Sharpening_preprocess
-/data/kits19/preprocessed_data 
-in: 5hrs 52min 0sec
 
 
