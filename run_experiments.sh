@@ -10,15 +10,15 @@ fi
 # gpus=(8 4 2 1)
 # mem_sizes=(-1 256 256 256)
 # dataset_sizes=(16 200 256 500)
+
 gpus=(8)
 mem_sizes=(256) # put -1 if you DO NOT want to limit the container memory size
-dataset_sizes=(256)
+dataset_sizes=(500)
 
 # 4 cases: 16GB, 200GB, 256GB and 500GB under each data path
 # "/raid/data/unet/augmentation/GaussianBlurring_dataset_500GB"
 # "/raid/data/unet/augmentation/Sharpening_dataset_500GB"
 data_paths=("/raid/data/unet/original_dataset/Original_dataset_500GB")
-
 workload_dir="/dl-bench/ruoyudeng/mlcomns_imseg"
 output_dir="/dl-bench/ruoyudeng/tracing_tools/trace_results"
 
@@ -26,6 +26,7 @@ output_dir="/dl-bench/ruoyudeng/tracing_tools/trace_results"
 if [[ "${#mem_sizes[@]}" != "${#dataset_sizes[@]}" ]]
 then
     echo "For each dataset size, you need to write a matching container memory size!"
+    echo "Example: mem_sizes=(-1 256), dataset_sizes=(16 200) means that 16GB dataset has no container memory limit, but the 200GB dataset has a 256GB memory limit"
     exit 1
 fi
 
@@ -58,7 +59,7 @@ for data_path in ${data_paths[@]}; do
         all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
         end_loop=$(date +%s)
         time_insec=$(( $end_loop - $start_loop ))
-        echo -e "Experiments using GPUs: (${all_gpus}) with ${data_path}, ${mem_size}GB dataset took: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec" >> experiments_time_records
+        echo -e "Experiments using GPUs: (${all_gpus}) with ${data_path}, ${dataset_size}GB dataset, ${mem_size}GB memory, took: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec" >> experiments_time_records
     done
 
 done
@@ -67,7 +68,6 @@ done
 end=$(date +%s)
 time_insec=$(( $end - $start ))
 exp_count=$((${#gpus[@]} * ${#data_paths[@]}))
-all_datasets=$(echo "${data_paths[*]}" | awk '$1=$1' FS=" " OFS="\n") # replace field seperator from space to AND for clear visualization
 all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
-echo -e "Ran ${exp_count} experiments with gpus:(${all_gpus}) in: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
+echo -e "Ran ${exp_count} experiments with gpus: (${all_gpus}) in: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
 
