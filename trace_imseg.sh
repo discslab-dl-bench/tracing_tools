@@ -113,13 +113,13 @@ main() {
 		mkdir -p $result_dir
 	fi
 
-
-	ckpts_dir="${workload_dir}/ckpts/${exp_name}/ckpts"
-	if [ ! -d $ckpts_dir ]
-	then
-		echo "Creating directory to store ckpts in: ${ckpts_dir}"
-		mkdir -p $ckpts_dir
-	fi
+	
+	# ckpts_dir="${workload_dir}/ckpts/${exp_name}/ckpts"
+	# if [ ! -d $ckpts_dir ]
+	# then
+	# 	echo "Creating directory to store ckpts in: ${ckpts_dir}"
+	# 	mkdir -p $ckpts_dir
+	# fi
 
 
 	# Kill the tmux session from a previous run if it exists
@@ -238,7 +238,7 @@ main() {
 	cp ${result_dir}/* $output_dir
 
 	# Copy the ckpt file to the results directory
-	cp ${ckpts_dir}/ckpt_* $output_dir
+	# cp ${ckpts_dir}/ckpt_* $output_dir (we do not need such ckpts files)
 	sleep 5 # give some time for copying to happen
 	# Archive the traces
 	output_parent_dir="$(dirname "$output_dir")"
