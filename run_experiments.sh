@@ -11,9 +11,9 @@ fi
 # mem_sizes=(-1 256 256 256)
 # dataset_sizes=(16 200 256 500)
 
-gpus=(8)
-mem_sizes=(-1) # put -1 if you DO NOT want to limit the container memory size
-dataset_sizes=(1)
+gpus=(4 2 1)
+mem_sizes=(256) # put -1 if you DO NOT want to limit the container memory size
+dataset_sizes=(256)
 
 # 4 cases: 16GB, 200GB, 256GB and 500GB under each data path
 # "/raid/data/unet/augmentation/GaussianBlurring_dataset_500GB"
@@ -39,14 +39,13 @@ for data_path in ${data_paths[@]}; do
     for i in ${!dataset_sizes[@]}; do
         dataset_size="${dataset_sizes[i]}"
         mem_size="${mem_sizes[i]}"
-        # echo $dataset_size
-        # echo $mem_size
         data_path=$(realpath -s  --canonicalize-missing $data_path) # make it a real path (add missing / or remove extra one)
         data_name=$(echo ${data_path} | awk -F "/" '{print $NF}' | awk -F "_" '{print $1}')
         size=$(echo ${dir_name} | awk -F "_" '{print $NF}')
         data_name="${data_name}_${dataset_size}GB"
         start_loop=$(date +%s)
         for gpu in ${gpus[@]}; do
+            start_gpu=$(date +%s)
             # run 1 tracing experiment
             exp_name="${gpu}gpu_${data_name}"
             # TODO:Implement customized mem size into trace_imseg.sh
@@ -55,11 +54,10 @@ for data_path in ${data_paths[@]}; do
             while kill -0 "$training_pid"; do
                 sleep 120 # check whether 1 tracing experiment is done or not in every 2 minutes
             done
+            end_gpu=$(date +%s)
+            time_insec_gpu=$(( $end_gpu - $start_gpu ))
+            echo -e "GPU_NUM: ${gpu}, DATASET: ${data_name}, DATASET_SIZE: ${dataset_size}GB, MEM_SIZE: ${mem_size}GB, took: $(($time_insec_gpu / 3600))hrs $((($time_insec_gpu / 60) % 60))min $(($time_insec_gpu % 60))sec" >> experiments_time_records
         done
-        all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
-        end_loop=$(date +%s)
-        time_insec=$(( $end_loop - $start_loop ))
-        echo -e "Experiments using GPUs: (${all_gpus}) with ${data_path}, ${dataset_size}GB dataset, ${mem_size}GB memory, took: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec" >> experiments_time_records
     done
 
 done
@@ -68,8 +66,8 @@ done
 end=$(date +%s)
 time_insec=$(( $end - $start ))
 exp_count=$((${#gpus[@]} * ${#data_paths[@]}))
-all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
-echo -e "Ran ${exp_count} experiments with gpus: (${all_gpus}) in: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
+# all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
+echo -e "Ran ${exp_count} experiments in: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
 
 # storing tar files and rezipping
 cd $output_dir
