@@ -12,15 +12,15 @@ fi
 # dataset_sizes=(16 200 256 500)
 
 gpus=(8)
-mem_sizes=(256) # put -1 if you DO NOT want to limit the container memory size
-dataset_sizes=(500)
+mem_sizes=(-1) # put -1 if you DO NOT want to limit the container memory size
+dataset_sizes=(1)
 
 # 4 cases: 16GB, 200GB, 256GB and 500GB under each data path
 # "/raid/data/unet/augmentation/GaussianBlurring_dataset_500GB"
 # "/raid/data/unet/augmentation/Sharpening_dataset_500GB"
 data_paths=("/raid/data/unet/original_dataset/Original_dataset_500GB")
 workload_dir="/dl-bench/ruoyudeng/mlcomns_imseg"
-output_dir="/dl-bench/ruoyudeng/tracing_tools/trace_results"
+output_dir="/raid/data/unet/trace_results"
 
 
 if [[ "${#mem_sizes[@]}" != "${#dataset_sizes[@]}" ]]
@@ -71,3 +71,10 @@ exp_count=$((${#gpus[@]} * ${#data_paths[@]}))
 all_gpus=$(echo "${gpus[*]}" | awk '$1=$1' FS=" " OFS=",")
 echo -e "Ran ${exp_count} experiments with gpus: (${all_gpus}) in: $(($time_insec / 3600))hrs $((($time_insec / 60) % 60))min $(($time_insec % 60))sec\n\n" >> experiments_time_records
 
+# storing tar files and rezipping
+cd $output_dir
+sudo cp -r ./traces* ../trace_results_tar
+cd ../trace_results_tar
+./rezip.sh
+cd ../trace_results
+rm -rf ./traces*
