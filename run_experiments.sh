@@ -13,7 +13,7 @@ fi
 
 gpus=(4 2 1)
 mem_sizes=(256) # put -1 if you DO NOT want to limit the container memory size
-dataset_sizes=(256)
+dataset_sizes=(500)
 
 # 4 cases: 16GB, 200GB, 256GB and 500GB under each data path
 # "/raid/data/unet/augmentation/GaussianBlurring_dataset_500GB"
@@ -42,12 +42,12 @@ for data_path in ${data_paths[@]}; do
         data_path=$(realpath -s  --canonicalize-missing $data_path) # make it a real path (add missing / or remove extra one)
         data_name=$(echo ${data_path} | awk -F "/" '{print $NF}' | awk -F "_" '{print $1}')
         size=$(echo ${dir_name} | awk -F "_" '{print $NF}')
-        data_name="${data_name}_${dataset_size}GB"
+        data_name_full="${data_name}_${dataset_size}GB"
         start_loop=$(date +%s)
         for gpu in ${gpus[@]}; do
             start_gpu=$(date +%s)
             # run 1 tracing experiment
-            exp_name="${gpu}gpu_${data_name}"
+            exp_name="${gpu}gpu_${data_name_full}"
             # TODO:Implement customized mem size into trace_imseg.sh
             ./trace_imseg.sh $workload_dir $output_dir $gpu $data_path $dataset_size $mem_size $exp_name &
             training_pid=$!
@@ -72,7 +72,7 @@ echo -e "Ran ${exp_count} experiments in: $(($time_insec / 3600))hrs $((($time_i
 # storing tar files and rezipping
 cd $output_dir
 sudo cp -r ./traces* ../trace_results_tar
+rm -rf ./traces*
+
 cd ../trace_results_tar
 ./rezip.sh
-cd ../trace_results
-rm -rf ./traces*
