@@ -171,27 +171,27 @@ main() {
 
 	# Get the system-wide PID of the root process ID in the container (usually bash)
 	# added: only want 1 root pid: awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}'
-	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
-	# root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}' | awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}')
+	# root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
+	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}' | awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}')
 
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
-	if [[ "$root_pid" =~ $'\n' ]]
-	then
-		RED='\033[0;31m'
-		NC='\033[0m' # No Color
-		echo -e "${RED}WARNING:${NC}"
-		echo "Multiple docker containers are running at the same time."
-		echo "This could interfere with your tracing - or your tracing could interfere with others!"
-		echo "Please check the calendar reservations, someone might have reserved the server for experiments."
-		echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'"
-		echo -e "Output of 'sudo docker ps' is printed below:\n"
-		sudo docker ps
-		echo -e "\nShutting down."
+	# if [[ "$root_pid" =~ $'\n' ]]
+	# then
+	# 	RED='\033[0;31m'
+	# 	NC='\033[0m' # No Color
+	# 	echo -e "${RED}WARNING:${NC}"
+	# 	echo "Multiple docker containers are running at the same time."
+	# 	echo "This could interfere with your tracing - or your tracing could interfere with others!"
+	# 	echo "Please check the calendar reservations, someone might have reserved the server for experiments."
+	# 	echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'"
+	# 	echo -e "Output of 'sudo docker ps' is printed below:\n"
+	# 	sudo docker ps
+	# 	echo -e "\nShutting down."
 
-		terminate_traces
+	# 	terminate_traces
 
-		exit 0
-	fi
+	# 	exit 0
+	# fi
 
 
 	echo "Root pid: \"$root_pid\""
