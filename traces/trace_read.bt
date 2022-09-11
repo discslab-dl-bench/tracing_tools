@@ -24,7 +24,7 @@ BEGIN
 //     char * buf;
 //     size_t count;
 tracepoint:syscalls:sys_enter_read
-/ comm == "python3" /
+/ comm == "python" /
 {
 	@read_start[tid] = nsecs;
 	@read_fd[tid] = args->fd; 

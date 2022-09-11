@@ -60,7 +60,9 @@ main() {
 	# Fix given paths i.e. remove trailing or extra slashes
 	workload_dir=$(realpath -s  --canonicalize-missing $workload_dir)
 	output_dir=$(realpath -s  --canonicalize-missing $output_dir)
-
+	echo "workload_dir: $workload_dir"
+	echo "output_dir: $output_dir"
+	
 	# Ensure num_gpus is numeric
 	re='^[0-9]+$'
 	if ! [[ $num_gpus =~ $re ]] ; then
@@ -141,6 +143,9 @@ main() {
 
 	sleep 1
 
+	# Get the system-wide PID of the root process ID in the container (usually bash)
+	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
+
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
 	then
@@ -193,21 +198,25 @@ main() {
 
 	terminate_traces
 
-	while [ ! -f ${workload_dir}/output/bert.log ] 
+	while [ ! -f ${workload_dir}/output/dlrm.log ] 
 	do
 		echo "Waiting for log to be generated"
 		sleep 2
 	done
 
-	# Copy the application log and casefile logs to the results directory
-	cp ${result_dir}/* $output_dir
+	# # Copy the application log and casefile logs to the results directory
+	# cp ${result_dir}/* $output_dir
 
-	# Copy the ckpt file to the results directory
-	# cp ${ckpts_dir}/ckpt_* $output_dir (we do not need such ckpts files)
-	sleep 5 # give some time for copying to happen
-	# Archive the traces
-	output_parent_dir="$(dirname "$output_dir")"
-	tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
+	# # Copy the ckpt file to the results directory
+	# # cp ${ckpts_dir}/ckpt_* $output_dir (we do not need such ckpts files)
+
+	sleep 10 # give some time for copying to happen
+	
+	# # Archive the traces
+	# output_parent_dir="$(dirname "$output_dir")"
+	# tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
+
+	echo "-----Trace_DLRM COMPLETED-----"
 
 	exit 0
 }
