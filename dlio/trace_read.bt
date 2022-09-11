@@ -26,10 +26,7 @@ BEGIN
 tracepoint:syscalls:sys_enter_read,
 tracepoint:syscalls:sys_enter_pread64
 / 
-comm != "nvsm_core" && comm != "ipmitool" && comm != "bash" && comm != "automount" && comm != "irqbalance" &&
-comm != "bpftrace" && comm != "systemd" && comm != "systemd-journal" && comm != "docker" &&
-comm != "nvidia-smi" && comm != "networkctl" && comm != "systemd-udevd" && comm != "systemd-resolve" &&
-comm != "lspci" && comm != "top" && comm != "smartctl" && comm != "nvipmitool" && comm != "htop"
+	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
 /
 {
 	@read_start[tid] = nsecs;
