@@ -23,7 +23,6 @@ BEGIN
 //     char * buf;
 //     size_t count;
 tracepoint:syscalls:sys_enter_read,
-tracepoint:syscalls:sys_enter_pread,
 tracepoint:syscalls:sys_enter_pread64
 / 
 	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
@@ -46,7 +45,6 @@ kprobe:vfs_read
 //     int __syscall_nr;
 //     long ret;
 tracepoint:syscalls:sys_exit_read,
-tracepoint:syscalls:sys_exit_pread,
 tracepoint:syscalls:sys_exit_pread64
 / @read_start[tid] /
 {
