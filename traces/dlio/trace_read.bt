@@ -4,7 +4,6 @@
 #include <linux/mm.h>
 
 // Shortened version to fit everything in a single printf call to avoid output clash under heavy load
-// Prints out a map of <PID, TID> at the end
 
 BEGIN
 {
@@ -24,6 +23,7 @@ BEGIN
 //     char * buf;
 //     size_t count;
 tracepoint:syscalls:sys_enter_read,
+tracepoint:syscalls:sys_enter_pread,
 tracepoint:syscalls:sys_enter_pread64
 / 
 	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
@@ -46,6 +46,7 @@ kprobe:vfs_read
 //     int __syscall_nr;
 //     long ret;
 tracepoint:syscalls:sys_exit_read,
+tracepoint:syscalls:sys_exit_pread,
 tracepoint:syscalls:sys_exit_pread64
 / @read_start[tid] /
 {
@@ -68,7 +69,6 @@ tracepoint:syscalls:sys_exit_pread64
 	delete(@requested[tid]);
 	delete(@filename[tid]);
 }
-
 
 
 // ************************************************************

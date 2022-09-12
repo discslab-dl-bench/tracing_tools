@@ -7,9 +7,9 @@
 terminate_traces() {
 	# Kill the training process and the traces
 	# if using strace, it was stopped when root_pid ended
-	docker kill dlio_tracing
-	docker rm dlio_tracing
-	tmux kill-session -t dlio_tracing
+	docker kill dlio_tracing 2>/dev/null
+	docker rm dlio_tracing	2>/dev/null
+	tmux kill-session -t dlio_tracing 2>/dev/null
 
 	kill $trace_bio_pid
 	kill $trace_read_pid
@@ -31,7 +31,8 @@ terminate_traces() {
 usage() { 
 	echo -e "Usage: $0 [OPTIONS]"
 	echo -e "  -h, --help\t\t\tPrint this message"
-	echo -e "  -w, --workload=name\tName of the workload. Must be one of bert,dlrm,imseg or dlio"
+	echo -e "  -w, --workload=name\t\tName of the workload. Must be one of bert, dlrm, imseg, dlio or explore"
+	echo -e "                     \t\tWith explore, traces are launched without attaching to a particular workload"
 	echo -e "  -l, --launch-script=path\tPath to the workload launch script"
 	echo -e "  -n, --num-gpus=num\t\tNumber of GPUs to launch the workload with, defaults to 1"
 	echo -e "  -o, --output-dir=dir\t\tDirectory where to write the traces, defaults to ./trace_results"
@@ -59,7 +60,7 @@ main() {
 	eval set -- "$TEMP"
 
 	# Default values
-	workload=
+	workload=""
 	launch_script=
 	num_gpus=1
 	exp_name="experiment"
@@ -81,19 +82,24 @@ main() {
 	done
 
 	# Check mandatory parameters were given
-	[ !$workload ] && echo -e "Workload is mandatory!\n" && usage
-	[ !$launch_script ] && echo -e "Launch script is mandatory!\n" && usage
-	[ ! -f $launch_script ] && echo -e "Launch script given does not exist!\n" && usage
+	[ -z $workload ] && echo -e "Workload is mandatory!\n" && usage
 
 	# Argument validation
 	case $workload in
-		"bert" ) break ;;
-		"dlrm" ) break ;;
-		"imseg" ) break ;;
-		"dlio" ) break ;;
-		* ) echo "Invalid workload given. Must be one of bert, dlrm, imseg or dlio"; exit 1 ;;
+		"bert" ) ;;
+		"dlrm" ) ;;
+		"imseg" ) ;;
+		"dlio" ) ;;
+		"explore" ) ;;
+		* ) echo "Error: Invalid workload given. Must be one of bert, dlrm, imseg, dlio or explore"; exit 1 ;;
 	esac
 	CONTAINER_NAME=train_${workload}
+
+	# In expore mode, we don't need a launch script
+	if [[ $workload != "explore" ]]; then
+		[ -z $launch_script ] && echo -e "Launch script is mandatory!\n" && usage
+		[ ! -f $launch_script ] && echo -e "Launch script given does not exist!\n" && usage
+	fi
 
 	# Fix given paths i.e. remove trailing or extra slashes
 	output_dir=$(realpath -s  --canonicalize-missing $output_dir)
@@ -109,18 +115,17 @@ main() {
 	fi
 
 	# Ensure num_gpus is numeric
-	if ! [[ $num_gpus =~ '^[0-9]+$' ]] ; then
+	if ! [[ $num_gpus =~ ^[0-9]+$ ]] ; then
 		echo "Error: '$num_gpus' is not a number!"
 		usage 
 	fi
 
 
-	# Flush filesystem caches
+	# Flush filesystem caches to ensure all files are read from disk
 	sync
 	echo 3 > /proc/sys/vm/drop_caches
 
 	sleep 5
-
 
 	echo "Starting traces"
 	# Kill the tmux session from a previous run if it exists
@@ -130,23 +135,27 @@ main() {
 	tmux new-session -d -s $CONTAINER_NAME
 
 	# Start the bpf traces, storing their pid
-	bpftrace ${workload}/trace_bio.bt -o ${output_dir}/trace_bio.out &
+	bpftrace traces/${workload}/trace_bio.bt -o ${output_dir}/trace_bio.out &
 	trace_bio_pid=$!
 
-	bpftrace ${workload}/trace_read.bt -o ${output_dir}/trace_read.out &
+	bpftrace traces/${workload}/trace_read.bt -o ${output_dir}/trace_read.out &
 	trace_read_pid=$!
 
-	bpftrace ${workload}/trace_write.bt -o ${output_dir}/trace_write.out &
+	bpftrace traces/${workload}/trace_write.bt -o ${output_dir}/trace_write.out &
 	trace_write_pid=$!
 
-	bpftrace ${workload}/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+	bpftrace traces/${workload}/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 	trace_create_del_pid=$!
 
-	bpftrace ${workload}/trace_openat.bt -o ${output_dir}/trace_openat.out &
+	bpftrace traces/${workload}/trace_openat.bt -o ${output_dir}/trace_openat.out &
 	trace_openat_pid=$!
 
-	bpftrace ${workload}/trace_close.bt -o ${output_dir}/trace_close.out &
+	bpftrace traces/${workload}/trace_close.bt -o ${output_dir}/trace_close.out &
 	trace_close_pid=$!
+
+	# Start time alignment trace
+	bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
+	trace_time_align_pid=$!
 
 	# Start the CPU and GPU traces
 	mpstat 1 > ${output_dir}/cpu.out &
@@ -156,41 +165,70 @@ main() {
 	nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		
 	trace_gpu_pid=$!
 
-	echo "Starting training"
-	# Start training within the tmux session. 
-	tmux send-keys -t $CONTAINER_NAME "sudo ${launch_script}" C-m
+	echo "All traces launched"
 
-	# Get the system-wide PID of the root process ID in the container (bash)
-	root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
+	if [[ $workload != "explore" ]]; then
+		echo "Starting training"
+		# Start training within the tmux session. 
+		tmux send-keys -t $CONTAINER_NAME "${launch_script}" C-m
 
-	echo "root pid: \"$root_pid\""
-
-	# If the previous command did not work (sometimes we must wait a bit), retry in a loop
-	while [ -z "$root_pid" ]
-	do
-		echo "failed to get training pid, trying again"
-		sleep 2
+		# Get the system-wide PID of the root process ID in the container (bash)
 		root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
-		echo "new try: $root_pid"
-	done
 
-	if [ use_strace ]; then
-		# Attach the syscall trace to the root_process 
-		# It will automatically attach to all spawned child processes
-		strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
+		echo "root pid: \"$root_pid\""
+
+		# If the previous command did not work (sometimes we must wait a bit), retry in a loop
+		while [ -z "$root_pid" ]
+		do
+			echo "failed to get training pid, trying again"
+			sleep 2
+			root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
+			echo "new try: $root_pid"
+		done
+
+		if [ use_strace ]; then
+			# Attach the syscall trace to the root_process 
+			# It will automatically attach to all spawned child processes
+			strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
+		fi
+
+		# Save PID/TID map for later reference
+		docker top $CONTAINER_NAME -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+
+		# Sleep a bit to let training spawn all workers
+		sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
+		# Capture PIDs/TIDs again now that workload should be in steady state
+		docker top $CONTAINER_NAME -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+
+		# Kill the time alignment trace early, 2min should be plenty
+		kill $trace_time_align_pid
+
+		echo "Now waiting until training completion"
+
+		while kill -0 "$root_pid"; do
+			sleep 5
+		done
+	else
+		# In exploraiton mode, we stop the time alignment trace after 60s 
+		# then keep running until Ctrl-C is received
+		ps aux -T > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+	
+		echo "Hit Ctrl-C to stop... the time alignment trace will stop in 60s"
+
+		# idle waiting for ctrl-c from user for 60s
+		read -t 60 -r -d '' _ </dev/tty
+
+		echo "60s have passed, killing time_alignment trace"
+		# Kill the time alignment trace early, 2min should be plenty
+		kill $trace_time_align_pid
+
+		echo "Hit Ctrl-C to stop..."
+
+		# idle waiting for ctrl-c from user
+		read -r -d '' _ </dev/tty
+
+		echo "Ctrl-C received. Stopping trace"
 	fi
-
-	# Save PID/TID map for later reference
-	docker top $CONTAINER_NAME -o user,pid,tid,spid,args e > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
-
-	echo "Now waiting until training completion"
-
-	# Now wait until training finishes
-	while kill -0 "$root_pid"; do
-		sleep 2
-		# Save PID/TID map 
-		docker top $CONTAINER_NAME -o user,pid,tid,spid,args e > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
-	done
 
 	# Sleep a bit more once training stops to capture full shutting down
 	sleep 5

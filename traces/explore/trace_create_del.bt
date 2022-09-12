@@ -26,7 +26,10 @@ BEGIN
 //     umode_t mode;				(unsigned short)
 tracepoint:syscalls:sys_enter_mkdir
 / 
-	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
+comm != "nvsm_core" && comm != "ipmitool" && comm != "bash" && comm != "automount" && comm != "irqbalance" &&
+comm != "bpftrace" && comm != "systemd" && comm != "systemd-journal" && comm != "docker" &&
+comm != "nvidia-smi" && comm != "networkctl" && comm != "systemd-udevd" && comm != "systemd-resolve" &&
+comm != "lspci" && comm != "top" && comm != "smartctl" && comm != "nvipmitool" 
 /
 {
 	@mkdir_start[tid] = nsecs;
@@ -61,7 +64,12 @@ tracepoint:syscalls:sys_exit_mkdir
 //     int __syscall_nr;
 //     const char * pathname;
 tracepoint:syscalls:sys_enter_rmdir
-/ comm == "python" /
+/ 
+comm != "nvsm_core" && comm != "ipmitool" && comm != "bash" && comm != "automount" && comm != "irqbalance" &&
+comm != "bpftrace" && comm != "systemd" && comm != "systemd-journal" && comm != "docker" &&
+comm != "nvidia-smi" && comm != "networkctl" && comm != "systemd-udevd" && comm != "systemd-resolve" &&
+comm != "lspci" && comm != "top" && comm != "smartctl" && comm != "nvipmitool" 
+/
 {
 	@rmdir_start[tid] = nsecs;
 	@rmdir_path[tid] = str(args->pathname);
@@ -91,7 +99,12 @@ tracepoint:syscalls:sys_exit_rmdir
 //     int __syscall_nr;
 //     const char * pathname;
 tracepoint:syscalls:sys_enter_unlink
-/ comm == "python" /
+/ 
+comm != "nvsm_core" && comm != "ipmitool" && comm != "bash" && comm != "automount" && comm != "irqbalance" &&
+comm != "bpftrace" && comm != "systemd" && comm != "systemd-journal" && comm != "docker" &&
+comm != "nvidia-smi" && comm != "networkctl" && comm != "systemd-udevd" && comm != "systemd-resolve" &&
+comm != "lspci" && comm != "top" && comm != "smartctl" && comm != "nvipmitool" 
+/
 {
 	@unlnk_start[tid] = nsecs;
 	@unlnk_fullpath[tid] = str(args->pathname);
@@ -135,7 +148,12 @@ tracepoint:syscalls:sys_enter_unlink
 // Note: I have never seen create() being called
 // It seems usually openat() with O_CREAT is called instead of it
 tracepoint:syscalls:sys_enter_creat
-/ comm == "python" /
+/ 
+comm != "nvsm_core" && comm != "ipmitool" && comm != "bash" && comm != "automount" && comm != "irqbalance" &&
+comm != "bpftrace" && comm != "systemd" && comm != "systemd-journal" && comm != "docker" &&
+comm != "nvidia-smi" && comm != "networkctl" && comm != "systemd-udevd" && comm != "systemd-resolve" &&
+comm != "lspci" && comm != "top" && comm != "smartctl" && comm != "nvipmitool" 
+/
 {
 	printf("%-17lu %-6d %-6d %-10s %-5hu %s\n", 
 		nsecs, 

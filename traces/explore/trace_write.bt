@@ -18,7 +18,8 @@ BEGIN
 //     unsigned int fd;
 //     const char * buf;
 //     size_t count
-tracepoint:syscalls:sys_enter_write
+tracepoint:syscalls:sys_enter_write,
+tracepoint:syscalls:sys_enter_pwrite64
 / 
 comm != "nvsm_core" && comm != "ipmitool" && comm != "bash" && comm != "automount" && comm != "irqbalance" &&
 comm != "bpftrace" && comm != "systemd" && comm != "systemd-journal" && comm != "docker" &&
@@ -40,7 +41,8 @@ kprobe:vfs_write
 	@write_filename[tid] = str(((struct file *)arg0)->f_path.dentry->d_name.name);
 }
 
-tracepoint:syscalls:sys_exit_write
+tracepoint:syscalls:sys_exit_write,
+tracepoint:syscalls:sys_exit_pwrite64
 / @write_start[tid] /
 {
 	$now = nsecs;

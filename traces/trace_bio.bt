@@ -24,7 +24,6 @@ kprobe:blk_account_io_start
 }
 
 kprobe:blk_account_io_done
-//@disk[arg0] == "xvda" && @start[arg0] != 0 && @iopid[arg0] != 0 && @iocomm[arg0] != ""/
 / @start[arg0] != 0 && @iopid[arg0] != 0 && @iocomm[arg0] != ""/
 {
 	$now = nsecs;

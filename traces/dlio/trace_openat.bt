@@ -20,10 +20,6 @@ BEGIN
 //     int flags;
 //     umode_t mode;
 tracepoint:syscalls:sys_enter_openat	
-
-// We're going to go with the very long exclude list because with BERT, 
-// the OS sees multiple processes not only named python opening files
-
 / 
 	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
 /
