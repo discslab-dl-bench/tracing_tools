@@ -95,11 +95,12 @@ main() {
 	esac
 	CONTAINER_NAME=train_${workload}
 
-	# In expore mode, we don't need a launch script
+	# In expore mode, the launch script is optional, but mandatory in other cases
 	if [[ $workload != "explore" ]]; then
 		[ -z $launch_script ] && echo -e "Launch script is mandatory!\n" && usage
-		[ ! -f $launch_script ] && echo -e "Launch script given does not exist!\n" && usage
 	fi
+	# If given, ensure the launch script exists
+	[ ! -z $launch_script ] && [ ! -f $launch_script ] && echo -e "Launch script given does not exist!\n" && usage
 
 	# Fix given paths i.e. remove trailing or extra slashes
 	output_dir=$(realpath -s  --canonicalize-missing $output_dir)
@@ -167,7 +168,10 @@ main() {
 
 	echo "All traces launched"
 
-	if [[ $workload != "explore" ]]; then
+	# Launch training in a tmux session, and wait until completion. 
+	# At this point, if we don't have a launch script, we are in pure exploration mode
+	# which is handled in the else clause: we just launch the traces and wait for Ctrl-C
+	if [[ ! -z $launch_script ]]; then
 		echo "Starting training"
 		# Start training within the tmux session. 
 		tmux send-keys -t $CONTAINER_NAME "${launch_script}" C-m
