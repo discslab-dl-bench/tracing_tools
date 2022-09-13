@@ -13,7 +13,7 @@ BEGIN
 }
 
 kprobe:blk_account_io_start
-/ comm == "python" /
+/ comm == "python" || comm == "run_pretraining" /
 {
 	@start[arg0] = nsecs;
 	@iopid[arg0] = pid;

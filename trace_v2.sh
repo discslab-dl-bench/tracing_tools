@@ -29,7 +29,8 @@ terminate_traces() {
 }
 
 usage() { 
-	echo -e "Usage: $0 [OPTIONS]"
+	echo -e "Usage: $0 [OPTIONS] [WORKLOAD ARGS]"
+	echo -e "\nOptions:"
 	echo -e "  -h, --help\t\t\tPrint this message"
 	echo -e "  -w, --workload=name\t\tName of the workload. Must be one of bert, dlrm, imseg, dlio or explore"
 	echo -e "                     \t\tWith explore, traces are launched without attaching to a particular workload"
@@ -38,6 +39,9 @@ usage() {
 	echo -e "  -o, --output-dir=dir\t\tDirectory where to write the traces, defaults to ./trace_results"
 	echo -e "  -e, --experiment-name=str\tOptional experiment name, defaults to \"experiment\""
 	echo -e "  -s, --strace\t\t\tUse strace to record all system calls made (very intensive)"
+	echo -e "Workload args:"
+	echo -e "  Any extra arguments passed after the above options (or after '--') will be passed as is to the workload launch script."
+	echo ""
 	exit 1
 }
 
@@ -80,6 +84,10 @@ main() {
 		* ) usage ;;
 	esac
 	done
+
+	extra_args=$@
+	echo $@
+	exit 0
 
 	# Check mandatory parameters were given
 	[ -z $workload ] && echo -e "Workload is mandatory!\n" && usage
@@ -173,26 +181,25 @@ main() {
 	# which is handled in the else clause: we just launch the traces and wait for Ctrl-C
 	if [[ ! -z $launch_script ]]; then
 		echo "Starting training"
-		# Start training within the tmux session. 
-		tmux send-keys -t $CONTAINER_NAME "${launch_script}" C-m
+		# Start training within the tmux session, passing any extra arguments
+		tmux send-keys -t $CONTAINER_NAME "${launch_script} ${extra_args}" C-m
 
 		# Get the system-wide PID of the root process ID in the container (bash)
 		root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
 
-		echo "root pid: \"$root_pid\""
-
 		# If the previous command did not work (sometimes we must wait a bit), retry in a loop
 		while [ -z "$root_pid" ]
 		do
-			echo "failed to get training pid, trying again"
-			sleep 2
+			# echo "failed to get training pid, trying again"
+			# sleep 1
 			root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
-			echo "new try: $root_pid"
 		done
+
+		echo "root pid: \"$root_pid\""
 
 		if [ use_strace ]; then
 			# Attach the syscall trace to the root_process 
-			# It will automatically attach to all spawned child processes
+			# It will automatically attach to all spawned child processes (-f flag)
 			strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
 		fi
 

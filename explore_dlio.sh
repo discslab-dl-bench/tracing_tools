@@ -40,18 +40,17 @@ main() {
 
 	if [ $# -lt 3 ]
 	then
-		echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
+		echo "Usage: $0 <workload_dir> <output_dir> (<experiment_name>)"
 		exit 1
 	fi
 
 	workload_dir=$1
 	output_dir=$2
-	num_gpus=$3
 
 	# Get the optional 4th argument
-	if [ $# -eq 4 ]
-	then	
-		exp_name="${4}"
+	if [ $# -eq 3 ]
+	then
+		exp_name="${3}"
 	else
 		exp_name="experiment"
 	fi
@@ -61,14 +60,6 @@ main() {
 	# Fix given paths i.e. remove trailing or extra slashes
 	workload_dir=$(realpath -s  --canonicalize-missing $workload_dir)
 	output_dir=$(realpath -s  --canonicalize-missing $output_dir)
-
-	# Ensure num_gpus is numeric
-	re='^[0-9]+$'
-	if ! [[ $num_gpus =~ $re ]] ; then
-	echo "Error: '$num_gpus' is not a number. <num_gpus> must be a number." >&2
-	echo "Usage: $0 <workload_dir> <output_dir> <num_gpus> (<experiment_name>)"
-	exit 1
-	fi
 
 	# Create the output directory
 	exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
@@ -101,22 +92,22 @@ main() {
 	tmux new-session -d -s $CONTAINER_NAME
 
 	# Start the bpf traces, storing their pid
-	bpftrace dlio/trace_bio.bt -o ${output_dir}/trace_bio.out &
+	bpftrace traces/explore/trace_bio.bt -o ${output_dir}/trace_bio.out &
 	trace_bio_pid=$!
 
-	bpftrace dlio/trace_read.bt -o ${output_dir}/trace_read.out &
+	bpftrace traces/explore/trace_read.bt -o ${output_dir}/trace_read.out &
 	trace_read_pid=$!
 
-	bpftrace dlio/trace_write.bt -o ${output_dir}/trace_write.out &
+	bpftrace traces/explore/trace_write.bt -o ${output_dir}/trace_write.out &
 	trace_write_pid=$!
 
-	bpftrace dlio/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+	bpftrace traces/explore/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 	trace_create_del_pid=$!
 
-	bpftrace dlio/trace_openat.bt -o ${output_dir}/trace_openat.out &
+	bpftrace traces/explore/trace_openat.bt -o ${output_dir}/trace_openat.out &
 	trace_openat_pid=$!
 
-	bpftrace dlio/trace_close.bt -o ${output_dir}/trace_close.out &
+	bpftrace traces/explore/trace_close.bt -o ${output_dir}/trace_close.out &
 	trace_close_pid=$!
 
 	# Start the CPU and GPU traces
@@ -132,38 +123,22 @@ main() {
 	tmux send-keys -t $CONTAINER_NAME "sudo ${workload_dir}/start_dlio.sh" C-m
 
 	# Get the system-wide PID of the root process ID in the container (bash)
-	# root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
 	root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
-
-	# # Check if $root_pid contains a newline character, indicating the previous command returned multiple values
-	# if [[ "$root_pid" =~ $'\n' ]]
-	# then
-	# 	RED='\033[0;31m'
-	# 	NC='\033[0m' # No Color
-	# 	echo -e "${RED}WARNING:${NC}"
-	# 	echo "Multiple docker containers are running at the same time."
-	# 	echo "This could interfere with your tracing - or your tracing could interfere with others!"
-	# 	echo "Please check the calendar reservations, someone might have reserved the server for experiments."
-	# 	echo "Run 'sudo docker ps' to list the other containers. If the server is yours right now, you can kill them with 'sudo docker kill <container id>'" 
-	# 	echo -e "Output of 'sudo docker ps' is printed below:\n"
-	# 	sudo docker ps
-
-	# 	echo -e "\nShutting down."
-
-	# 	terminate_traces
-
-	# 	exit 0
-	# fi
 
 	echo "root pid: \"$root_pid\""
 
+	max_retries=100
 	# If the previous command did not work (sometimes we must wait a bit), retry in a loop
 	while [ -z "$root_pid" ]
 	do
-		echo "failed to get training pid, trying again"
-		sleep 2
+		[ $max_retries == 0 ]; then
+			echo "ERROR: Could not get root PID. Exiting."
+			terminate_traces
+			exit 1
+		fi
+		max_retries=$(( $max_retries-1 ))
+		sleep 0.25
 		root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
-		echo "new try: $root_pid"
 	done
 
 	# Attach the syscall trace to the root_process 
