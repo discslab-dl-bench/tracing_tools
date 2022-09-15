@@ -25,7 +25,6 @@ BEGIN
 //     const char * pathname;
 //     umode_t mode;				(unsigned short)
 tracepoint:syscalls:sys_enter_mkdir
-/ comm == "python" /
 {
 	@mkdir_start[tid] = nsecs;
 	@mkdir_path[tid] = str(args->pathname);

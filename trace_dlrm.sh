@@ -205,7 +205,7 @@ main() {
 	done
 
 	# # Copy the application log and casefile logs to the results directory
-	# cp ${result_dir}/* $output_dir
+	sudo cp ${workload_dir}/output/dlrm.log $output_dir
 
 	# # Copy the ckpt file to the results directory
 	# # cp ${ckpts_dir}/ckpt_* $output_dir (we do not need such ckpts files)
