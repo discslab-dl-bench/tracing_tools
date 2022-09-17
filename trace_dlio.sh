@@ -36,19 +36,21 @@ main() {
 		exit -1
 	fi
 
-	if [ $# -lt 2 ]
+	if [ $# -lt 4 ]
 	then
-		echo "Usage: $0 <workload_dir> <output_dir> (<experiment_name>)"
+		echo "Usage: $0 <workload_dir> <output_dir> <num_gpu> <generate_data (y/n)> (<experiment_name>)"
 		exit 1
 	fi
 
 	workload_dir=$1
 	output_dir=$2
+	num_gpu=$3
+	generate_data=$4
 
 	# Get the optional 3rd argument
-	if [ $# -eq 3 ]
+	if [ $# -eq 5 ]
 	then	
-		exp_name="${3}"
+		exp_name="${5}"
 	else
 		exp_name="experiment"
 	fi
@@ -115,7 +117,8 @@ main() {
 
 	echo "Starting DLIO in the dlio_training tmux session"
 	# Start training within the tmux session. 
-	tmux send-keys -t dlio_tracing "sudo ${workload_dir}/start_dlio.sh" C-m
+	# hard-coded tracing for dlio, note: we want to generate some files first time we run, but not after
+	tmux send-keys -t dlio_tracing "sudo ${workload_dir}/start_dlio.sh $num_gpu $generate_data" C-m
 
 	# Get the system-wide PID of the root process ID in the container (bash)
 	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
@@ -161,8 +164,8 @@ main() {
 
 	echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 
-	# # Save PID/TID map for later reference
-	# ps aux -T | grep python > ${output_dir}/pids.out
+	# Save PID/TID map for later reference
+	ps aux -T | grep python | grep -wv vscode-server > ${output_dir}/pids.out
 
 	# Kill the time alignment trace early, 2min should be plenty
 	kill $trace_time_align_pid
