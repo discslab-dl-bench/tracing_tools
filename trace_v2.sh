@@ -32,12 +32,13 @@ usage() {
 	echo -e "Usage: $0 [OPTIONS] [WORKLOAD ARGS]"
 	echo -e "\nOptions:"
 	echo -e "  -h, --help\t\t\tPrint this message"
-	echo -e "  -w, --workload=name\t\tName of the workload. Must be one of bert, dlrm, imseg, dlio or explore"
-	echo -e "                     \t\tWith explore, traces are launched without attaching to a particular workload"
-	echo -e "  -l, --launch-script=path\tPath to the workload launch script"
-	echo -e "  -n, --num-gpus=num\t\tNumber of GPUs to launch the workload with, defaults to 1"
-	echo -e "  -o, --output-dir=dir\t\tDirectory where to write the traces, defaults to ./trace_results"
-	echo -e "  -e, --experiment-name=str\tOptional experiment name, defaults to \"experiment\""
+	echo -e "  -w, --workload\t\t\tName of the workload. Must be one of bert, dlrm, imseg, dlio or explore"
+	echo -e "                  \t\tWith explore, traces are launched without attaching to a particular workload"
+	echo -e "  -l, --launch-script\t\tPath to the workload launch script"
+	echo -e "  -c, --container\t\tName to give the docker container running the workload - defaults to train_{workload}"
+	echo -e "  -n, --num-gpus\t\tNumber of GPUs to launch the workload with, defaults to 1"
+	echo -e "  -o, --output-dir\t\tDirectory where to write the traces, defaults to ./trace_results"
+	echo -e "  -e, --experiment-name\tOptional experiment name, defaults to \"experiment\""
 	echo -e "  -s, --strace\t\t\tUse strace to record all system calls made (very intensive)"
 	echo -e "Workload args:"
 	echo -e "  Any extra arguments passed after the above options (or after '--') will be passed as is to the workload launch script."
@@ -55,7 +56,7 @@ main() {
 
 	# See https://stackoverflow.com/questions/402377/using-getopts-to-process-long-and-short-command-line-options
 
-	TEMP=$(getopt -o hl:n:o:e:sw: --long help,launch-script:,num-gpus:,output-dir:,experiment-name:,strace,workload: \
+	TEMP=$(getopt -o hl:n:o:e:sw:c: --long help,launch-script:,num-gpus:,output-dir:,experiment-name:,strace,workload:,container: \
 				-n 'trace_v2' -- "$@")
 
 	if [ $? != 0 ] ; then usage; exit 1 ; fi
@@ -66,6 +67,7 @@ main() {
 	# Default values
 	workload=""
 	launch_script=
+	container_name=
 	num_gpus=1
 	exp_name="experiment"
 	output_dir="./trace_results"
@@ -76,6 +78,7 @@ main() {
 		-h | --help ) usage ;;
 		-w | --workload ) workload="$2"; shift 2 ;;
 		-l | --launch-script ) launch_script="$2"; shift 2 ;;
+		-c | --container ) container_name="$2"; shift 2 ;;
 		-n | --num-gpus ) num_gpus="$2"; shift 2 ;;
 		-o | --output-dir ) output_dir="$2"; shift 2 ;;
 		-e | --experiment-name ) exp_name="$2"; shift 2 ;;
@@ -86,8 +89,6 @@ main() {
 	done
 
 	extra_args=$@
-	echo $@
-	exit 0
 
 	# Check mandatory parameters were given
 	[ -z $workload ] && echo -e "Workload is mandatory!\n" && usage
@@ -101,7 +102,15 @@ main() {
 		"explore" ) ;;
 		* ) echo "Error: Invalid workload given. Must be one of bert, dlrm, imseg, dlio or explore"; exit 1 ;;
 	esac
-	CONTAINER_NAME=train_${workload}
+
+	[ -z $container_name ] && container_name=train_${workload}
+
+	if [ "$(docker ps -a | grep $container_name)" ]
+	then 
+		echo "Container name '$container_name' is already used by an existing container."
+		echo "Remove the container or choose a different name."
+		exit 1
+	fi
 
 	# In expore mode, the launch script is optional, but mandatory in other cases
 	if [[ $workload != "explore" ]]; then
@@ -133,15 +142,14 @@ main() {
 	# Flush filesystem caches to ensure all files are read from disk
 	sync
 	echo 3 > /proc/sys/vm/drop_caches
-
-	sleep 5
+	sleep 2
 
 	echo "Starting traces"
 	# Kill the tmux session from a previous run if it exists
-	tmux kill-session -t $CONTAINER_NAME 2>/dev/null
+	tmux kill-session -t $container_name 2>/dev/null
 
 	# Start a new tmux session from which we will run training
-	tmux new-session -d -s $CONTAINER_NAME
+	tmux new-session -d -s $container_name
 
 	# Start the bpf traces, storing their pid
 	bpftrace traces/${workload}/trace_bio.bt -o ${output_dir}/trace_bio.out &
@@ -182,17 +190,23 @@ main() {
 	if [[ ! -z $launch_script ]]; then
 		echo "Starting training"
 		# Start training within the tmux session, passing any extra arguments
-		tmux send-keys -t $CONTAINER_NAME "${launch_script} ${extra_args}" C-m
+		tmux send-keys -t $container_name "${launch_script} $num_gpus $container_name ${extra_args}" C-m
 
 		# Get the system-wide PID of the root process ID in the container (bash)
-		root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
+		root_pid=$(docker inspect -f '{{.State.Pid}}' $container_name)
 
+		max_retries=100
 		# If the previous command did not work (sometimes we must wait a bit), retry in a loop
 		while [ -z "$root_pid" ]
 		do
-			# echo "failed to get training pid, trying again"
-			# sleep 1
-			root_pid=$(docker inspect -f '{{.State.Pid}}' $CONTAINER_NAME)
+			if [ $max_retries == 0 ]; then
+				echo "ERROR: Could not get root PID. Exiting."
+				terminate_traces
+				exit 1
+			fi
+			max_retries=$(( $max_retries-1 ))
+			sleep 0.05
+			root_pid=$(docker inspect -f '{{.State.Pid}}' $container_name)
 		done
 
 		echo "root pid: \"$root_pid\""
@@ -204,12 +218,12 @@ main() {
 		fi
 
 		# Save PID/TID map for later reference
-		docker top $CONTAINER_NAME -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+		docker top $container_name -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 
 		# Sleep a bit to let training spawn all workers
 		sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
 		# Capture PIDs/TIDs again now that workload should be in steady state
-		docker top $CONTAINER_NAME -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+		docker top $container_name -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 
 		# Kill the time alignment trace early, 2min should be plenty
 		kill $trace_time_align_pid
