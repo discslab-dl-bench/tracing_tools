@@ -20,7 +20,7 @@ BEGIN
 //     int flags;
 //     umode_t mode;
 tracepoint:syscalls:sys_enter_openat	
-/ comm == "python3" /
+/ comm == "python" || comm == "run_pretraining" /
 {
 	@o_start[tid] = nsecs;
 	@o_flags[tid] = args->flags;

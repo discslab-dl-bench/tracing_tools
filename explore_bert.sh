@@ -68,7 +68,6 @@ main() {
 	exit 1
 	fi
 
-
 	# Create the output directory
 	exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
 	output_dir="${output_dir}/${exp_name}"
@@ -100,27 +99,23 @@ main() {
 	tmux new-session -d -s train_bert
 
 	# Start the bpf traces, storing their pid
-	bpftrace traces/bert/trace_bio.bt -o ${output_dir}/trace_bio.out &
+	bpftrace exploration_traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
 	trace_bio_pid=$!
 
-	bpftrace traces/bert/trace_read.bt -o ${output_dir}/trace_read.out &
+	bpftrace exploration_traces/trace_read.bt -o ${output_dir}/trace_read.out &
 	trace_read_pid=$!
 
-	bpftrace traces/bert/trace_write.bt -o ${output_dir}/trace_write.out &
+	bpftrace exploration_traces/trace_write.bt -o ${output_dir}/trace_write.out &
 	trace_write_pid=$!
 
-	bpftrace traces/bert/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+	bpftrace exploration_traces/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 	trace_create_del_pid=$!
 
-	bpftrace traces/bert/trace_openat.bt -o ${output_dir}/trace_openat.out &
+	bpftrace exploration_traces/trace_openat.bt -o ${output_dir}/trace_openat.out &
 	trace_openat_pid=$!
 
-	bpftrace traces/bert/trace_close.bt -o ${output_dir}/trace_close.out &
+	bpftrace exploration_traces/trace_close.bt -o ${output_dir}/trace_close.out &
 	trace_close_pid=$!
-
-	# Start time alignment trace
-	bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
-	trace_time_align_pid=$!
 
 	# Start the CPU and GPU traces
 	mpstat 1 > ${output_dir}/cpu.out &
@@ -170,37 +165,27 @@ main() {
 
 	# Attach the syscall trace to the root_process 
 	# It will automatically attach to all spawned child processes
-	#strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+	strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+
+	# Save PID/TID map for later reference
+	ps aux -T | grep python > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 
 	# Sleep a bit to let training spawn all workers
-	sleep 120
-
-	echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
-
-	# # Save PID/TID map for later reference
-	# ps aux -T | grep python > ${output_dir}/pids.out
-
-	# Kill the time alignment trace early, 2min should be plenty
-	kill $trace_time_align_pid
+	sleep 60
 
 	echo "Now waiting until training completion"
 
 	# Now wait until training finishes
 	while kill -0 "$root_pid"; do
-		sleep 5
+		sleep 60
+		# Save PID/TID map 
+		ps aux -T | grep python > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 	done
 
 	# Sleep a bit more once training stops to capture full shutting down
 	sleep 10
 
 	terminate_traces
-
-	# # Copy the application log to the results directory
-	# cp ${workload_dir}/bert.log $output_dir
-
-	# # Archive the traces
-	# output_parent_dir="$(dirname "$output_dir")"
-	# tar zcvf "${output_parent_dir}/traces_${exp_name}.tar.gz" $output_dir
 
 	exit 0
 }
