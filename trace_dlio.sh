@@ -153,7 +153,7 @@ main() {
 
 	# Attach the syscall trace to the root_process 
 	# It will automatically attach to all spawned child processes
-	strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+	#strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
 
 	# Sleep a bit to let training spawn all workers
 	sleep 120
