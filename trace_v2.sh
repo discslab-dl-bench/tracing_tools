@@ -260,6 +260,8 @@ main() {
 
 	terminate_traces
 
+	echo "All done. Don't forget to copy the application log if you need it for plotting."
+
 	exit 0
 }
 
