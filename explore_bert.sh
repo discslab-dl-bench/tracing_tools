@@ -99,22 +99,22 @@ main() {
 	tmux new-session -d -s train_bert
 
 	# Start the bpf traces, storing their pid
-	bpftrace exploration_traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
+	bpftrace traces/explore/trace_bio.bt -o ${output_dir}/trace_bio.out &
 	trace_bio_pid=$!
 
-	bpftrace exploration_traces/trace_read.bt -o ${output_dir}/trace_read.out &
+	bpftrace traces/explore/trace_read.bt -o ${output_dir}/trace_read.out &
 	trace_read_pid=$!
 
-	bpftrace exploration_traces/trace_write.bt -o ${output_dir}/trace_write.out &
+	bpftrace traces/explore/trace_write.bt -o ${output_dir}/trace_write.out &
 	trace_write_pid=$!
 
-	bpftrace exploration_traces/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+	bpftrace traces/explore/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 	trace_create_del_pid=$!
 
-	bpftrace exploration_traces/trace_openat.bt -o ${output_dir}/trace_openat.out &
+	bpftrace traces/explore/trace_openat.bt -o ${output_dir}/trace_openat.out &
 	trace_openat_pid=$!
 
-	bpftrace exploration_traces/trace_close.bt -o ${output_dir}/trace_close.out &
+	bpftrace traces/explore/trace_close.bt -o ${output_dir}/trace_close.out &
 	trace_close_pid=$!
 
 	# Start the CPU and GPU traces
