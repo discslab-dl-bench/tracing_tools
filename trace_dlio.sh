@@ -83,22 +83,22 @@ main() {
 	tmux new-session -d -s dlio_tracing
 
 	# Start the bpf traces, storing their pid
-	bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
+	bpftrace traces/dlio/trace_bio.bt -o ${output_dir}/trace_bio.out &
 	trace_bio_pid=$!
 
-	bpftrace traces/trace_read.bt -o ${output_dir}/trace_read.out &
+	bpftrace traces/dlio/trace_read.bt -o ${output_dir}/trace_read.out &
 	trace_read_pid=$!
 
-	bpftrace traces/trace_write.bt -o ${output_dir}/trace_write.out &
+	bpftrace traces/dlio/trace_write.bt -o ${output_dir}/trace_write.out &
 	trace_write_pid=$!
 
-	bpftrace traces/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+	bpftrace traces/dlio/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 	trace_create_del_pid=$!
 
-	bpftrace traces/trace_openat.bt -o ${output_dir}/trace_openat.out &
+	bpftrace traces/dlio/trace_openat.bt -o ${output_dir}/trace_openat.out &
 	trace_openat_pid=$!
 
-	bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
+	bpftrace traces/dlio/trace_close.bt -o ${output_dir}/trace_close.out &
 	trace_close_pid=$!
 
 	# Start time alignment trace
@@ -140,7 +140,6 @@ main() {
 		exit 0
 	fi
 
-
 	echo "root pid: \"$root_pid\""
 
 	# If the previous command did not work (sometimes we must wait a bit), retry in a loop
@@ -154,7 +153,7 @@ main() {
 
 	# Attach the syscall trace to the root_process 
 	# It will automatically attach to all spawned child processes
-	strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+	#strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
 
 	# Sleep a bit to let training spawn all workers
 	sleep 120

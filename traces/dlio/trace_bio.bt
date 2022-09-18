@@ -13,10 +13,13 @@ BEGIN
 }
 
 kprobe:blk_account_io_start
-/ comm == "python3" /
+/ 
+	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
+/
 {
 	@start[arg0] = nsecs;
 	@iopid[arg0] = pid;
+	@iotid[arg0] = tid;
 	@iocomm[arg0] = comm;
 	@disk[arg0] = ((struct request *)arg0)->rq_disk->disk_name;
 	@rw[arg0] = (((struct request *)arg0)->cmd_flags & 255) == 1 ? "W" : "R";
@@ -52,6 +55,7 @@ END
 {
 	clear(@start);
 	clear(@iopid);
+	clear(@iotid);
 	clear(@iocomm);
 	clear(@disk);
 	clear(@rw);
