@@ -6,8 +6,7 @@
 
 BEGIN
 {
-	printf("%-17s %-6s %-4s ", "TIMESTAMP", "PID", "FD");
-	printf("%-13s %-8s %-10s %-10s %-8s\n", "BUFFER ADDR", "OFFSET", "REQ (B)", "RET (B)", "LAT(ns)");
+	printf("%-17s %-8s %-8s %-10s %-10s %-8s\n", "TIMESTAMP", "PID", "TID", "COMM", "LAT (ns)", "FILENAME");
 }
 
 // ************************************************************
@@ -44,17 +43,12 @@ tracepoint:syscalls:sys_exit_pwrite64
 	$now = nsecs;
 	$latency = $now - @write_start[tid];
 
-	printf("%-17lu %-6d %s 0x%-13lx %-8d %-10d ", 
+	printf("%-17lu %-8d %-8d %s %-10d %s\n", 
 		$now,
 		pid,
+		tid,
 		comm,
-		@write_address[tid],
-		@write_offset[tid],
-		@write_requested[tid]
-	);
-	printf("%-10d %-10d %s\n", 
-		args->ret, 
-		$latency, 
+		$latency,
 		@write_filename[tid]
 	);
 
