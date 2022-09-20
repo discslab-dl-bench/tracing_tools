@@ -15,8 +15,8 @@ tmux kill-session -t imseg
 
 if [[ "$clean" == "clean" ]]
 then
-    sudo rm -rf /dl-bench/ruoyudeng/tracing_tools/trace_results/*
+    # sudo rm -rf /dl-bench/ruoyudeng/tracing_tools/trace_results/*
     sudo rm -rf /dl-bench/ruoyudeng/mlcomns_imseg/results/*
-    sudo rm -rf /dl-bench/ruoyudeng/mlcomns_imseg/ckpts/*
+    # sudo rm -rf /dl-bench/ruoyudeng/mlcomns_imseg/ckpts/*
 fi
 

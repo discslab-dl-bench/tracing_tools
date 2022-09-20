@@ -118,10 +118,11 @@ main() {
 	echo "Starting DLIO in the dlio_training tmux session"
 	# Start training within the tmux session. 
 	# hard-coded tracing for dlio, note: we want to generate some files first time we run, but not after
-	tmux send-keys -t dlio_tracing "sudo ${workload_dir}/start_dlio.sh $num_gpu $generate_data" C-m
+	tmux send-keys -t dlio_tracing "sudo ${workload_dir}/start_dlio.sh $num_gpu train_dlio $generate_data" C-m
 
 	# Get the system-wide PID of the root process ID in the container (bash)
 	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
+	# root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}' | awk 'BEGIN{ RS = "" ; FS = "\n" }{print $1}')
 
 		# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
@@ -157,7 +158,7 @@ main() {
 
 	# Attach the syscall trace to the root_process 
 	# It will automatically attach to all spawned child processes
-	strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
+	# strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list' -o ${output_dir}/strace.out &
 
 	# Sleep a bit to let training spawn all workers
 	sleep 120
@@ -182,8 +183,9 @@ main() {
 
 	terminate_traces
 
-	# # Copy the application log to the results directory
-	# cp ${workload_dir}/bert.log $output_dir
+	# HARDCODED: copy the dlio log files to output_dir
+	sudo cp -r /raid/data/unet/dlio_unet3d/output/*.log $output_dir
+	sudo rm -r /raid/data/unet/dlio_unet3d/output/*.log # clean up output dir
 
 	# # Archive the traces
 	# output_parent_dir="$(dirname "$output_dir")"

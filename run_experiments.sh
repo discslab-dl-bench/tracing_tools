@@ -11,7 +11,7 @@ fi
 # mem_sizes=(-1 256 256 256)
 # dataset_sizes=(16 200 256 500)
 
-gpus=(4 2 1)
+gpus=(1)
 mem_sizes=(256) # put -1 if you DO NOT want to limit the container memory size
 dataset_sizes=(500)
 
@@ -71,8 +71,6 @@ echo -e "Ran ${exp_count} experiments in: $(($time_insec / 3600))hrs $((($time_i
 
 # storing tar files and rezipping
 cd $output_dir
-sudo cp -r ./traces* ../trace_results_tar
-rm -rf ./traces*
-
+sudo mv ./traces* ../trace_results_tar
 cd ../trace_results_tar
 ./rezip.sh
