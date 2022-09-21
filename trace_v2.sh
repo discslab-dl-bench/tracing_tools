@@ -211,7 +211,7 @@ main() {
 
 		echo "root pid: \"$root_pid\""
 
-		if [ use_strace ]; then
+		if $use_strace; then
 			# Attach the syscall trace to the root_process 
 			# It will automatically attach to all spawned child processes (-f flag)
 			strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
