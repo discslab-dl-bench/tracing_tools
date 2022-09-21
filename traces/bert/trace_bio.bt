@@ -1,0 +1,58 @@
+#!/usr/bin/env bpftrace
+
+#include <linux/blkdev.h>
+
+/*
+ * Adaptation of biosnoop.bt by Brendan Gregg
+ */
+
+BEGIN
+{
+	printf("%-17s %-8s %-14s %-8s %-14s ", "TIMESTAMP", "PID", "COMM", "DONEPID", "DONECOMM");
+	printf("%-4s %-1s %-12s %s\n", "DISK", "T", "BYTES", "LAT(ns)");
+}
+
+kprobe:blk_account_io_start
+/ comm == "python" || comm == "run_pretraining" /
+{
+	@start[arg0] = nsecs;
+	@iopid[arg0] = pid;
+	@iocomm[arg0] = comm;
+	@disk[arg0] = ((struct request *)arg0)->rq_disk->disk_name;
+	@rw[arg0] = (((struct request *)arg0)->cmd_flags & 255) == 1 ? "W" : "R";
+	@len[arg0] =  ((struct request *)arg0)->__data_len;
+}
+
+kprobe:blk_account_io_done
+/ @start[arg0] != 0 && @iopid[arg0] != 0 && @iocomm[arg0] != ""/
+{
+	$now = nsecs;
+	
+	printf("%-17lu %-8d %-14s %-8d %-14s %-4s ",	
+		$now,    
+		@iopid[arg0], 
+		@iocomm[arg0], 
+		pid,
+		comm,
+		@disk[arg0] 
+	);
+
+	printf("%-1s %-12lu %lu\n", @rw[arg0], @len[arg0], ($now - @start[arg0]));
+
+	delete(@start[arg0]);
+	delete(@iopid[arg0]);
+	delete(@iocomm[arg0]);
+	delete(@disk[arg0]);
+	delete(@rw[arg0]);
+	delete(@len[arg0]);
+}
+
+END
+{
+	clear(@start);
+	clear(@iopid);
+	clear(@iocomm);
+	clear(@disk);
+	clear(@rw);
+	clear(@len);
+}

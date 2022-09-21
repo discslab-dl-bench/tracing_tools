@@ -7,7 +7,7 @@ BEGIN
 }
 
 // ************************************************************
-// 	TIME ALIGNMENT
+// 	TIME ALIGNMENT TRACE
 //	Simply prints out the nsecs timestamp followed by the local time
 // 	to later be able to align the tmiestamp to a given time.
 // ************************************************************

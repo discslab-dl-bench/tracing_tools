@@ -5,12 +5,13 @@ This repository contains `bpftrace` traces used to characterize ML workloads as 
 Paired with traces of CPU and GPU activity, they can be used to generate timelines such as this:
 ![image](assets/4gpus_1xRAM.png)
 
-There are a few traces under `traces/`:
+You will find various subdirectories and traces under `traces/`. 
+Due to the need for different filtering to trace each workload, all of the subdirectories contain slightly different variants of the following traces:
 - `trace_bio.bt` records block level reads and writes 
 - `trace_close.bt` records files closing 
 - `trace_create_del.bt` records files being created and deleted
 - `trace_openat.bt` records file openings
-- `trace_read.bt` records file system reads - when programs issue read() system calls
+- `trace_read.bt` records calls to read() and pread64() system calls
 - `trace_time_align.bt` is a special trace used to map the timestamps given by `bpftrace` to UTC timestamps for plotting.
 - `trace_write.bt` records file system writes
 

@@ -129,22 +129,22 @@ main() {
 	tmux new-session -d -s train_imseg
 
 	# Start the bpf traces, storing their pid
-	bpftrace traces/trace_bio.bt -o ${output_dir}/trace_bio.out &
+	bpftrace traces/imseg/trace_bio.bt -o ${output_dir}/trace_bio.out &
 	trace_bio_pid=$!
 
-	bpftrace traces/trace_read.bt -o ${output_dir}/trace_read.out &
+	bpftrace traces/imseg/trace_read.bt -o ${output_dir}/trace_read.out &
 	trace_read_pid=$!
 
-	bpftrace traces/trace_write.bt -o ${output_dir}/trace_write.out &
+	bpftrace traces/imseg/trace_write.bt -o ${output_dir}/trace_write.out &
 	trace_write_pid=$!
 
-	bpftrace traces/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
+	bpftrace traces/imseg/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
 	trace_create_del_pid=$!
 
-	bpftrace traces/trace_openat.bt -o ${output_dir}/trace_openat.out &
+	bpftrace traces/imseg/trace_openat.bt -o ${output_dir}/trace_openat.out &
 	trace_openat_pid=$!
 
-	bpftrace traces/trace_close.bt -o ${output_dir}/trace_close.out &
+	bpftrace traces/imseg/trace_close.bt -o ${output_dir}/trace_close.out &
 	trace_close_pid=$!
 
 	# Start time alignment trace

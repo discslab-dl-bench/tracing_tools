@@ -1,0 +1,86 @@
+#!/usr/local/bin/bpftrace
+
+#include <linux/fs.h>
+#include <linux/mm.h>
+
+
+BEGIN
+{
+	printf("%-17s %-6s %-4s ", "TIMESTAMP", "PID", "FD");
+	printf("%-13s %-8s %-10s %-10s %-8s\n", "BUFFER ADDR", "OFFSET", "REQ (B)", "RET (B)", "LAT(ns)");
+}
+
+// ************************************************************
+// 	FILE WRITING
+// ************************************************************
+
+// tracepoint:syscalls:sys_enter_write
+//     int __syscall_nr;
+//     unsigned int fd;
+//     const char * buf;
+//     size_t count
+<<<<<<< HEAD:traces/trace_write.bt
+tracepoint:syscalls:sys_enter_write
+/ comm == "python3" || comm == "python" /
+=======
+tracepoint:syscalls:sys_enter_write,
+tracepoint:syscalls:sys_enter_pwrite64
+/ comm == "python" /
+>>>>>>> 1fb8718e48327db2614e8270206825f5784cc09e:traces/dlrm/trace_write.bt
+{
+	@write_start[tid] = nsecs;
+	@write_fd[tid] = args->fd; 
+	@write_requested[tid] = args->count;
+}
+
+// ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_t *pos)
+kprobe:vfs_write
+/ @write_start[tid] /
+{
+	@write_address[tid] = arg1;
+	@write_offset[tid] = *arg3;
+	@write_filename[tid] = str(((struct file *)arg0)->f_path.dentry->d_name.name);
+}
+
+tracepoint:syscalls:sys_exit_write,
+tracepoint:syscalls:sys_exit_pwrite64
+/ @write_start[tid] /
+{
+	$now = nsecs;
+	$latency = $now - @write_start[tid];
+
+	printf("%-17lu %-6d %s 0x%-13lx %-8d %-10d ", 
+		$now,
+		pid,
+		comm,
+		@write_address[tid],
+		@write_offset[tid],
+		@write_requested[tid]
+	);
+	printf("%-10d %-10d %s\n", 
+		args->ret, 
+		$latency, 
+		@write_filename[tid]
+	);
+
+	delete(@write_start[tid]);
+	delete(@write_fd[tid]);
+	delete(@write_address[tid]);
+	delete(@write_offset[tid]);
+	delete(@write_requested[tid]);
+	delete(@write_filename[tid]);
+}
+
+
+// ************************************************************
+// 	CLEANUP
+// ************************************************************
+END 
+{
+	clear(@write_start);
+	clear(@write_fd);
+	clear(@write_address);
+	clear(@write_offset);
+	clear(@write_requested);
+	clear(@write_filename);
+}

@@ -19,7 +19,11 @@ BEGIN
 //    int __syscall_nr;
 //    unsigned int fd;
 tracepoint:syscalls:sys_enter_close
+<<<<<<< HEAD:traces/trace_close.bt
 / comm == "python3" || comm == "python" /
+=======
+/ comm == "python" /
+>>>>>>> 1fb8718e48327db2614e8270206825f5784cc09e:traces/dlrm/trace_close.bt
 {	
 	@c_start[tid] = nsecs;
 	@c_fd[tid] = args->fd;

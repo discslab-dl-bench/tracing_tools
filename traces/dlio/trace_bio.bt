@@ -13,10 +13,17 @@ BEGIN
 }
 
 kprobe:blk_account_io_start
+<<<<<<< HEAD:traces/trace_bio.bt
 / comm == "python3" || comm == "python" /
+=======
+/ 
+	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
+/
+>>>>>>> 1fb8718e48327db2614e8270206825f5784cc09e:traces/dlio/trace_bio.bt
 {
 	@start[arg0] = nsecs;
 	@iopid[arg0] = pid;
+	@iotid[arg0] = tid;
 	@iocomm[arg0] = comm;
 	@disk[arg0] = ((struct request *)arg0)->rq_disk->disk_name;
 	@rw[arg0] = (((struct request *)arg0)->cmd_flags & 255) == 1 ? "W" : "R";
@@ -52,6 +59,7 @@ END
 {
 	clear(@start);
 	clear(@iopid);
+	clear(@iotid);
 	clear(@iocomm);
 	clear(@disk);
 	clear(@rw);
