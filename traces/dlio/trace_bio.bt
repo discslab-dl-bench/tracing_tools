@@ -13,13 +13,9 @@ BEGIN
 }
 
 kprobe:blk_account_io_start
-<<<<<<< HEAD:traces/trace_bio.bt
-/ comm == "python3" || comm == "python" /
-=======
 / 
 	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
 /
->>>>>>> 1fb8718e48327db2614e8270206825f5784cc09e:traces/dlio/trace_bio.bt
 {
 	@start[arg0] = nsecs;
 	@iopid[arg0] = pid;
