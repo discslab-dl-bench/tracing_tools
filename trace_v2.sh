@@ -260,6 +260,12 @@ main() {
 
 	terminate_traces
 
+	# Hardcoded copying log files into trace results
+	if [[ $workload == "dlio" ]]; then
+		cp -r /raid/data/unet/dlio_unet3d/output/*.log ${output_dir}
+		sudo rm -rf /raid/data/unet/dlio_unet3d/output/*
+	fi
+
 	echo "All done. Don't forget to copy the application log if you need it for plotting."
 
 	exit 0
