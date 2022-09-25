@@ -139,7 +139,7 @@ main() {
 
 	# -----------------------------------------Start Running Workload---------------------------------------------
 
-	tmux send-keys -t train_dlrm "sudo ${workload_dir}/start_dlrm_training.sh" C-m
+	tmux send-keys -t trace_dlrm "sudo ${workload_dir}/start_dlrm_training.sh" C-m
 
 	sleep 1
 
