@@ -189,9 +189,14 @@ main() {
 	# which is handled in the else clause: we just launch the traces and wait for Ctrl-C
 	if [[ ! -z $launch_script ]]; then
 		echo "Starting training"
-		# Start training within the tmux session, passing any extra arguments
-		tmux send-keys -t $container_name "${launch_script} $num_gpus $container_name ${extra_args}" C-m
 
+		if [[ "$workload" == "imseg" ]]; then
+			tmux send-keys -t $container_name "${launch_script} $num_gpus $container_name $exp_name ${extra_args}" C-m
+
+		else
+			# Start training within the tmux session, passing any extra arguments
+			tmux send-keys -t $container_name "${launch_script} $num_gpus $container_name ${extra_args}" C-m
+		fi
 		# Get the system-wide PID of the root process ID in the container (bash)
 		root_pid=$(docker inspect -f '{{.State.Pid}}' $container_name)
 

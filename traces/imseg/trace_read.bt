@@ -23,14 +23,9 @@ BEGIN
 //     unsigned int fd;
 //     char * buf;
 //     size_t count;
-<<<<<<< HEAD:traces/trace_read.bt
-tracepoint:syscalls:sys_enter_read
-/ comm == "python3" || comm == "python" /
-=======
 tracepoint:syscalls:sys_enter_read,
 tracepoint:syscalls:sys_enter_pread64
 / comm == "python" /
->>>>>>> 1fb8718e48327db2614e8270206825f5784cc09e:traces/imseg/trace_read.bt
 {
 	@read_start[tid] = nsecs;
 	@read_fd[tid] = args->fd; 

@@ -11,15 +11,17 @@ fi
 # mem_sizes=(-1 256 256 256)
 # dataset_sizes=(16 200 256 500)
 
-gpus=(1)
+gpus=(8)
 mem_sizes=(256) # put -1 if you DO NOT want to limit the container memory size
-dataset_sizes=(500)
+dataset_sizes=(200)
 
 # 4 cases: 16GB, 200GB, 256GB and 500GB under each data path
 # "/raid/data/unet/augmentation/GaussianBlurring_dataset_500GB"
 # "/raid/data/unet/augmentation/Sharpening_dataset_500GB"
 data_paths=("/raid/data/unet/original_dataset/Original_dataset_500GB")
+workload="imseg"
 workload_dir="/dl-bench/ruoyudeng/mlcomns_imseg"
+launch_script="/dl-bench/ruoyudeng/mlcomns_imseg/start_training.sh"
 output_dir="/raid/data/unet/trace_results"
 
 
@@ -49,7 +51,8 @@ for data_path in ${data_paths[@]}; do
             # run 1 tracing experiment
             exp_name="${gpu}gpu_${data_name_full}"
             # TODO:Implement customized mem size into trace_imseg.sh
-            ./trace_imseg.sh $workload_dir $output_dir $gpu $data_path $dataset_size $mem_size $exp_name &
+            # ./test.sh -w imseg -l /launch_path -n 8gpu -o /output_dir -e exp_name -- /data_path 200gb 256gb
+            ./trace_v2.sh -w $workload -l $launch_script -n $gpu -o $output_dir -e $exp_name -- $workload_dir $data_path $dataset_size $mem_size  &
             training_pid=$!
             while kill -0 "$training_pid"; do
                 sleep 120 # check whether 1 tracing experiment is done or not in every 2 minutes
