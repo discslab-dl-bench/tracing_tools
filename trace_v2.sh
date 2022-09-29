@@ -7,9 +7,7 @@
 terminate_traces() {
 	# Kill the training process and the traces
 	# if using strace, it was stopped when root_pid ended
-	docker kill dlio_tracing 2>/dev/null
-	docker rm dlio_tracing	2>/dev/null
-	tmux kill-session -t dlio_tracing 2>/dev/null
+	docker kill $1 2>/dev/null
 
 	kill $trace_bio_pid
 	kill $trace_read_pid
@@ -201,17 +199,17 @@ main() {
 		do
 			if [ $max_retries == 0 ]; then
 				echo "ERROR: Could not get root PID. Exiting."
-				terminate_traces
+				terminate_traces $container_name
 				exit 1
 			fi
 			max_retries=$(( $max_retries-1 ))
 			sleep 0.05
-			root_pid=$(docker inspect -f '{{.State.Pid}}' $container_name)
+			root_pid=$(docker inspect -f '{{.State.Pid}}' $container_name) 2>/dev/null
 		done
 
 		echo "root pid: \"$root_pid\""
 
-		if [ use_strace ]; then
+		if $use_strace; then
 			# Attach the syscall trace to the root_process 
 			# It will automatically attach to all spawned child processes (-f flag)
 			strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
@@ -258,7 +256,7 @@ main() {
 	# Sleep a bit more once training stops to capture full shutting down
 	sleep 5
 
-	terminate_traces
+	terminate_traces $container_name
 
 	echo "All done. Don't forget to copy the application log if you need it for plotting."
 
