@@ -8,10 +8,10 @@
 # time_insec=$(( $end - $start ))
 
 workload="dlio"
-launch_script="/raid/data/unet/dlio_benchmark/start_dlio.sh"
+launch_script="/dl-bench/ruoyudeng/dlio_benchmark/start_dlio.sh"
 num_gpu=8
 output_dir="/raid/data/unet/trace_results"
-exp_name="8gpu_256gb"
+exp_name="8gpu_200gb"
 
 # Kill the tmux session from a previous run if it exists
 tmux kill-session -t dlio_unet 2>/dev/null

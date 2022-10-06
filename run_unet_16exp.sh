@@ -18,11 +18,13 @@ dataset_sizes=(200)
 # 4 cases: 16GB, 200GB, 256GB and 500GB under each data path
 # "/raid/data/unet/augmentation/GaussianBlurring_dataset_500GB"
 # "/raid/data/unet/augmentation/Sharpening_dataset_500GB"
-data_paths=("/raid/data/unet/original_dataset/Original_dataset_500GB")
+
 workload="imseg"
+output_dir="/raid/data/unet/trace_results"
+
+data_paths=("/raid/data/unet/original_dataset/Original_dataset_500GB")
 workload_dir="/dl-bench/ruoyudeng/mlcomns_imseg"
 launch_script="/dl-bench/ruoyudeng/mlcomns_imseg/start_training.sh"
-output_dir="/raid/data/unet/trace_results"
 
 
 if [[ "${#mem_sizes[@]}" != "${#dataset_sizes[@]}" ]]
