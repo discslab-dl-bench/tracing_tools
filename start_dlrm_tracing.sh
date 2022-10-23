@@ -9,4 +9,4 @@ data_path=TODO
 dataset_size=TODO
 mem_constraints=TODO
 
-sudo ./trace_dlrm.sh $workload_dir $output_dir $num_gpus $data_path $dataset_size $mem_constraints
+sudo ./trace_dlrm.sh $workload_dir $output_dir $num_gpus $data_path $dataset_size $mem_constraints terabyte_tracing

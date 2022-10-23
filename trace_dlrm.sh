@@ -139,12 +139,13 @@ main() {
 
 	# -----------------------------------------Start Running Workload---------------------------------------------
 
-	tmux send-keys -t trace_dlrm "sudo ${workload_dir}/start_dlrm_training.sh" C-m
+	tmux send-keys -t train_dlrm "sudo ${workload_dir}/start_dlrm_training.sh" C-m
 
 	sleep 1
 
 	# Get the system-wide PID of the root process ID in the container (usually bash)
 	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
+	# root_pid=$(ps -aux | grep "python dlrm_s_pytorch.py" | grep "root" | awk '{ print $2 }' | head -1)
 
 	# Check if $root_pid contains a newline character, indicating the previous command returned multiple values
 	if [[ "$root_pid" =~ $'\n' ]]
@@ -198,14 +199,14 @@ main() {
 
 	terminate_traces
 
-	while [ ! -f ${workload_dir}/output/dlrm.log ] 
+	while [ ! -f /raid/data/dlrm/dlrm_logs/mlperf_logs/dlrm.log ] 
 	do
 		echo "Waiting for log to be generated"
 		sleep 2
 	done
 
 	# # Copy the application log and casefile logs to the results directory
-	sudo cp ${workload_dir}/output/dlrm.log $output_dir
+	sudo cp /raid/data/dlrm/dlrm_logs/mlperf_logs $output_dir
 
 	# # Copy the ckpt file to the results directory
 	# # cp ${ckpts_dir}/ckpt_* $output_dir (we do not need such ckpts files)
