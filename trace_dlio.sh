@@ -115,7 +115,7 @@ main() {
 
 	echo "Starting DLIO in the dlio_training tmux session"
 	# Start training within the tmux session. 
-	tmux send-keys -t dlio_tracing "sudo ${workload_dir}/start_dlio.sh" C-m
+	tmux send-keys -t dlio_tracing "sudo ${workload_dir}/old_start_dlio.sh" C-m
 
 	# Get the system-wide PID of the root process ID in the container (bash)
 	root_pid=$(grep -E "NSpid:[[:space:]]+[0-9]+[[:space:]]+1$" /proc/*/status 2> /dev/null | awk '{print $2}')
@@ -161,8 +161,8 @@ main() {
 
 	echo "Slept 120s, collecting PIDs/TIDs and time_alignment trace"
 
-	# # Save PID/TID map for later reference
-	# ps aux -T | grep python > ${output_dir}/pids.out
+	# Save PID/TID map for later reference
+	ps aux -T | grep python > ${output_dir}/pids.out
 
 	# Kill the time alignment trace early, 2min should be plenty
 	kill $trace_time_align_pid
