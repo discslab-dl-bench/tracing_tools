@@ -6,7 +6,7 @@
 
 BEGIN
 {
-	printf("%-17s %-6s %-5s %-8s %s %s\n", "TIMESTAMP", "PID", "FD", "LAT(ns)", "FULLPATH", "FILENAME");
+	printf("%-17s %-6s %-5s %-8s %s %s\n", "TIMESTAMP", "PID", "COMM", "LAT(ns)", "FULLPATH", "FILENAME");
 }
 
 // ************************************************************

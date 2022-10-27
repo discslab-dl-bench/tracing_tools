@@ -6,7 +6,7 @@
 
 BEGIN
 {
-	printf("%-17s %-8s %-8s %-8s %-8s %s\n", "TIMESTAMP", "PID", "TID", "COMM", "LAT(ns)", "FULLPATH");
+	printf("%-17s %-6s %-5s %-8s %s %s\n", "TIMESTAMP", "PID", "COMM", "LAT(ns)", "FULLPATH", "FILENAME");
 }
 
 // ************************************************************
@@ -20,9 +20,7 @@ BEGIN
 //     int flags;
 //     umode_t mode;
 tracepoint:syscalls:sys_enter_openat	
-/ 
-	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
-/
+/ comm == "python3" || comm == "mpirun" || comm == "horovodrun" /
 {
 	@o_start[tid] = nsecs;
 	@o_flags[tid] = args->flags;
@@ -46,10 +44,10 @@ tracepoint:syscalls:sys_exit_openat
 	printf("%-17lu %-8d %-8d %s %-8d %s\n",
 		$now, 
 		pid,
-		tid,
-		comm,
+		comm,			// the file descriptor
 		$latency,
-		@o_fullpath[tid]
+		@o_fullpath[tid],
+		@o_filename[tid]
 	);
 
 	delete(@o_start[tid]);
