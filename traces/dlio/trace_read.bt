@@ -3,13 +3,10 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 
-// Shortened version to fit everything in a single printf call to avoid output clash under heavy load
-
 BEGIN
 {
-	printf("%-17s %-8s %-8s %-12s %-12s %s\n", "TIMESTAMP", "PID", "TID", "COMM", "LAT(ns)", "FILENAME");
+	printf("%-17s %-6s %-8s %-12s %-12s %s\n", "TIMESTAMP", "PID", "OFFSET", "RET (B)", "LAT(ns)", "FILENAME");
 }
-
 
 // ************************************************************
 // 	FILE READING
@@ -24,9 +21,7 @@ BEGIN
 //     size_t count;
 tracepoint:syscalls:sys_enter_read,
 tracepoint:syscalls:sys_enter_pread64
-/ 
-	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
-/
+/ comm == "python3" || comm == "mpirun" || comm == "horovodrun" /
 {
 	@read_start[tid] = nsecs;
 	@read_fd[tid] = args->fd; 
@@ -54,8 +49,8 @@ tracepoint:syscalls:sys_exit_pread64
 	printf("%-17lu %-8d %-8d %s %-12lu %s\n", 
 		$now,
 		pid,
-		tid,
-		comm,
+		@offset[tid],
+		args->ret, 			// number of bytes returned
 		$latency,
 		@filename[tid]
 	);

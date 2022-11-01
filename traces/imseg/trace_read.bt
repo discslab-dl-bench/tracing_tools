@@ -3,14 +3,10 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 
-// Shortened version to fit everything in a single printf call to avoid output clash under heavy load
-// Prints out a map of <PID, TID> at the end
-
 BEGIN
 {
-	printf("%-17s %-6s %-4s %-12s %-12s %s\n", "TIMESTAMP", "PID", "FD", "RET (B)", "LAT(ns)", "FILENAME");
+	printf("%-17s %-6s %-8s %-12s %-12s %s\n", "TIMESTAMP", "PID", "OFFSET", "RET (B)", "LAT(ns)", "FILENAME");
 }
-
 
 // ************************************************************
 // 	FILE READING
@@ -31,6 +27,7 @@ tracepoint:syscalls:sys_enter_pread64
 	@read_fd[tid] = args->fd; 
 	@requested[tid] = args->count;
 }
+
 // ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 kprobe:vfs_read
 / @read_start[tid] /
@@ -53,7 +50,7 @@ tracepoint:syscalls:sys_exit_pread64
 	printf("%-17lu %-6d %s %-12lu %-12lu %s\n", 
 		$now,
 		pid,
-		comm,
+		@offset[tid],
 		args->ret, 			// number of bytes returned
 		$latency, 
 		@filename[tid]
