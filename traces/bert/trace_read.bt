@@ -3,6 +3,8 @@
 #include <linux/fs.h>
 #include <linux/mm.h>
 
+//TODO: Add support for preadv and preadv2, which have a different signature
+
 BEGIN
 {
 	printf("%-17s %-6s %-8s %-12s %-12s %s\n", "TIMESTAMP", "PID", "OFFSET", "RET (B)", "LAT(ns)", "FILENAME");
@@ -46,7 +48,7 @@ tracepoint:syscalls:sys_exit_pread64
 	$now = nsecs;
 	$latency = $now - @read_start[tid];
 
-	printf("%-17lu %-6d %s %-12lu %-12lu %s\n", 
+	printf("%-17lu %-8d 0x%-13lx %-12lu %-12lu %s\n", 
 		$now,
 		pid,
 		@offset[tid],
