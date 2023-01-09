@@ -17,7 +17,10 @@ terminate_traces() {
 	kill $trace_close_pid
 	kill $trace_cpu_pid
 	kill $trace_gpu_pid
-
+	kill $trace_syscalls_pid
+	# Need to nicely kill iostat else the json will be malformed
+	kill -SIGINT $iostat_pid
+	
 	# Kill any remaining traces that didn't get killed above
 	remaining_traces=$(ps | grep bpftrace | awk '{print $1}')
 	for proc in $remaining_traces; 
@@ -121,7 +124,7 @@ main() {
 	output_dir=$(realpath -s  --canonicalize-missing $output_dir)
 
 	# Create the output directory
-	exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
+	#exp_name="${exp_name}_$(date +'%Y%m%d%H%M%S')"
 	output_dir="${output_dir}/${exp_name}"
 
 	if [ ! -d $output_dir ] 
@@ -135,7 +138,6 @@ main() {
 		echo "Error: '$num_gpus' is not a number!"
 		usage 
 	fi
-
 
 	# Flush filesystem caches to ensure all files are read from disk
 	sync
@@ -172,6 +174,9 @@ main() {
 	bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
 	trace_time_align_pid=$!
 
+	bpftrace traces/syscalls.bt -o ${output_dir}/syscalls.out &
+	trace_syscalls_pid=$!
+
 	# Start the CPU and GPU traces
 	mpstat 1 > ${output_dir}/cpu.out &
 	trace_cpu_pid=$!
@@ -179,6 +184,10 @@ main() {
 	#TODO: Explore using Nsight for GPU tracing
 	nvidia-smi pmon -s um -o DT -f ${output_dir}/gpu.out &		
 	trace_gpu_pid=$!
+
+	# NEW iostat
+	iostat -mdxty sda sdb 1 -o JSON	> ${output_dir}/iostat.json &
+	iostat_pid=$!
 
 	echo "All traces launched"
 
@@ -189,7 +198,7 @@ main() {
 		echo "Starting training with command: ${launch_script} $num_gpus $container_name ${extra_args}"
 		# Start training within the tmux session, passing any extra arguments
 		tmux send-keys -t $container_name "${launch_script} $num_gpus $container_name ${extra_args}" C-m
-
+		sleep 1
 		# Get the system-wide PID of the root process ID in the container (bash)
 		root_pid=$(docker inspect -f '{{.State.Pid}}' $container_name)
 
@@ -212,11 +221,11 @@ main() {
 		if $use_strace; then
 			# Attach the syscall trace to the root_process 
 			# It will automatically attach to all spawned child processes (-f flag)
-			strace -T -ttt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
+			strace -T -tt -f -p $root_pid -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
 		fi
 
-		# Save PID/TID map for later reference
-		docker top $container_name -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+		# # Save PID/TID map for later reference
+		# docker top $container_name -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 
 		# Sleep a bit to let training spawn all workers
 		sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
@@ -232,7 +241,7 @@ main() {
 			sleep 5
 		done
 	else
-		# In exploraiton mode, we stop the time alignment trace after 60s 
+		# In exploration mode, we stop the time alignment trace after 60s 
 		# then keep running until Ctrl-C is received
 		ps aux -T > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 	

@@ -1,0 +1,16 @@
+#!/usr/local/bin/bpftrace
+
+BEGIN
+{
+	printf("%-17s %-6s %-10s %s\n", "TIMESTAMP", "PID", "COMMAND", "SYSCALL");
+}
+
+tracepoint:syscalls:sys_enter*
+/ comm == "python" || comm == "run_pretraining" /
+{
+	//printf("%-17lu %-8d %-10s %s\n",	
+	//	nsecs, pid, comm, probe
+	//);
+	// Count syscalls by process
+    @[probe] = count();
+}
