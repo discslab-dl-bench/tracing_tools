@@ -262,8 +262,10 @@ main() {
 		echo "Ctrl-C received. Stopping trace"
 	fi
 
+	# Flush out any writes to disk
+	sync
 	# Sleep a bit more once training stops to capture full shutting down
-	sleep 5
+	sleep 2
 
 	terminate_traces $container_name
 

@@ -5,12 +5,23 @@
 
 # Archive and zip all directories matching pattern
 pushd trace_results
-for d in $(ls | grep _1200steps)
-do 
+for d in $(ls | grep UNET_2GPU_2b_1w_nostep7)
+do
+    echo $d
     tar cvzf ../archive/${d}.tar.gz $d
     [ $? != 0 ] && exit 1
+    scp ../archive/${d}.tar.gz lhovon@discslab-server1:/data/lhovon/traces/
 done
-
 popd
 
-scp archive/*_1200steps.tar.gz lhovon@discslab-server1:/data/lhovon/traces/BERT_multi_proc_analysis
+# pushd trace_results
+# for d in $(ls | grep ins_original)
+# do 
+#     tar cvzf ../archive/${d}.tar.gz $d
+#     [ $? != 0 ] && exit 1
+#     scp ../archive/${d}.tar.gz lhovon@discslab-server1:/data/lhovon/traces/UNET_instrumented_original
+# done
+# popd
+
+
+# scp archive/*_1200steps.tar.gz lhovon@discslab-server1:/data/lhovon/traces/BERT_multi_proc_analysis
