@@ -20,7 +20,7 @@
 BEGIN
 {
 	printf("%-17s %-8s %-14s ", "TIMESTAMP", "PID", "COMM");
-	printf("%-4s %-1s %-12s %s %s\n", "DISK", "T", "BYTES", "QLAT(ns)", "LAT(ns)");
+	printf("%-4s %-1s %-12s %s %s\n", "DISK", "T", "BYTES", "SECTOR", "LAT(ns)");
 }
 
 /*
@@ -41,6 +41,7 @@ comm != "lspci" && comm != "top" && comm != "smartctl" && comm != "nvipmitool" &
 	@iocomm[arg0] = comm;
 	@disk[arg0] = ((struct request *)arg0)->rq_disk->disk_name;
 	@rw[arg0] = (((struct request *)arg0)->cmd_flags & 255) == 1 ? "W" : "R";
+	@sector[arg0] = ((struct request *)arg0)->__sector;
 	@len[arg0] =  ((struct request *)arg0)->__data_len;
 }
 
@@ -67,7 +68,7 @@ kprobe:blk_account_io_done
 		@disk[arg0] 
 	);
 
-	printf("%-1s %-12lu %lu %lu\n", @rw[arg0], @len[arg0], $now - @qstart[arg0], $now - @start[arg0]);
+	printf("%-1s %-12lu %-12llu %lu\n", @rw[arg0], @len[arg0], @sector[arg0], $now - @start[arg0]);
 
 	delete(@start[arg0]);
 	delete(@qstart[arg0]);
@@ -75,6 +76,7 @@ kprobe:blk_account_io_done
 	delete(@iocomm[arg0]);
 	delete(@disk[arg0]);
 	delete(@rw[arg0]);
+	delete(@sector[arg0]);
 	delete(@len[arg0]);
 }
 
@@ -85,5 +87,6 @@ END
 	clear(@iocomm);
 	clear(@disk);
 	clear(@rw);
+	clear(@sector);
 	clear(@len);
 }

@@ -5,12 +5,12 @@
 
 # Archive and zip all directories matching pattern
 pushd trace_results
-for d in $(ls | grep UNET_2GPU_2b_1w_nostep7)
+for d in $(ls | grep UNET_latest.*_nostep7)
 do
     echo $d
     tar cvzf ../archive/${d}.tar.gz $d
     [ $? != 0 ] && exit 1
-    scp ../archive/${d}.tar.gz lhovon@discslab-server1:/data/lhovon/traces/
+    scp ../archive/${d}.tar.gz lhovon@discslab-server1:/data/lhovon/traces/UNET_latest_w_nostep7
 done
 popd
 
