@@ -264,8 +264,8 @@ main() {
 
 	# Flush out any writes to disk
 	sync
-	# Sleep a bit more once training stops to capture full shutting down
-	sleep 2
+	# Sleep a bit more once training stops to capture flushes
+	sleep 10
 
 	terminate_traces $container_name
 
