@@ -54,7 +54,7 @@ tracepoint:syscalls:sys_exit_pread64
 {
 	$now = nsecs;
 
-	printf("%-17lu %-8d %-8s 0x%-13lx %-12lu %s\n", 
+	printf("%-17lu %-8d %-8s %-16llu %-12lu %s\n", 
 		$now,
 		pid,
 		comm,

@@ -48,7 +48,7 @@ tracepoint:syscalls:sys_exit_pread64
 	$now = nsecs;
 	$latency = $now - @read_start[tid];
 
-	printf("%-17lu %-8d 0x%-13lx %-12lu %-12lu %s\n", 
+	printf("%-17lu %-8d %-16llu %-12lu %-12lu %s\n", 
 		$now,
 		pid,
 		@offset[tid],

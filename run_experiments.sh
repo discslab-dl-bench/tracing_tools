@@ -11,36 +11,41 @@ else
 fi
 
 
-declare -a num_gpus=(2 4 8)
+declare -a num_gpus=(8 6 4 2)
 
-declare -a batch_sizes_dlrm=(2048 4096)
-declare -a batch_sizes_bert=()
 
 # # per worker batch sizes
-declare -a batch_sizes_unet=(2 4)
+declare -a batch_sizes_unet=(2 3 4 5)
+declare -a batch_sizes_dlrm=(2048 4096 8192 16384)
+declare -a batch_sizes_bert=(3 4 5 6)
 
-declare -a num_workers=(1)
+
+UNET_OUTPUT_DIR="/raid/data/imseg/run_output"
+DLRM_OUTPUT_DIR="/raid/data/dlrm/run_output"
+BERT_OUTPUT_DIR="/raid/data/bert/run_output"
 
 rm -f experiments_run
 touch experiments_run
 
-# num_gpu=8
 
-# for batch_size in "${batch_sizes_unet[@]}"
-# do
-#     exp_name="UNET_original_1w_${num_gpu}GPU_batch${batch_size}"
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_unet[@]}"
+    do
+        exp_name="UNET_original_1w_${num_gpu}GPU_batch${batch_size}"
 
-#     if [ $DRY_RUN = true ]
-#     then
-#         echo $exp_name
-#     else
-#         echo $exp_name | tee -a experiments_run
-#         # UNET - by default it will do 1 worker and do step 7
-#         ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- $batch_size
-#         mv /raid/data/imseg/run_output/unet3d.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
-#         rm -f /raid/data/imseg/run_output/*
-#     fi
-# done
+        if [ $DRY_RUN = true ]
+        then
+            echo $exp_name
+        else
+            echo $exp_name | tee -a experiments_run
+            # UNET - by default it will do 1 worker and do step 7
+            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- $batch_size
+            mv ${UNET_OUTPUT_DIR}/unet3d.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
+            rm -rf ${UNET_OUTPUT_DIR}/*
+        fi
+    done
+done
 
 
 for num_gpu in "${num_gpus[@]}";
@@ -55,29 +60,38 @@ do
         else
             # This DLRM run should be relatively long, eval twice at the middle and at the end
             echo $exp_name | tee -a experiments_run
-            ./trace_v2.sh -w dlrm -l /dl-bench/lhovon/mlcomns_dlrm/start_training.sh -c dlrm_loic -n $num_gpu -e $exp_name -- loic $batch_size
-            mv /raid/data/dlrm/run_output/app.log /dl-bench/lhovon/tracing_tools/trace_results/${exp_name}/app.log
-            mv /raid/data/dlrm/run_output/dlrm_tera.log /dl-bench/lhovon/tracing_tools/trace_results/${exp_name}/dlrm.log
+            ./trace_v2.sh -w dlrm -l /dl-bench/lhovon/mlcomns_dlrm/start_training.sh -c dlrm_loic -n $num_gpu -e $exp_name -- dlrm:loic $batch_size
+            mv ${DLRM_OUTPUT_DIR}/app.log /dl-bench/lhovon/tracing_tools/trace_results/${exp_name}/app.log
+            mv ${DLRM_OUTPUT_DIR}/dlrm_tera.log /dl-bench/lhovon/tracing_tools/trace_results/${exp_name}/dlrm.log
+            rm -rf ${DLRM_OUTPUT_DIR}/*
         fi
     done
 done
 
 
-BERT_OUTPUT_DIR="/raid/data/bert/run_output"
 
-./trace_v2.sh -w bert -l /dl-bench/lhovon/mlcomns_bert/start_training.sh -c train_bert -n 4 -e BERT_horovod_4gpu_6b_2400steps -- -i bert-tf:loic -g 4 -b 24
-mv ${BERT_OUTPUT_DIR}/* /dl-bench/lhovon/tracing_tools/trace_results/BERT_horovod_4gpu_6b_2400steps/
-rm -rf ${BERT_OUTPUT_DIR}/*
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_bert[@]}"
+    do
+        exp_name="BERT_horovod_${num_gpu}GPU_batch${batch_size}_2400s"
 
-./trace_v2.sh -w bert -l /dl-bench/lhovon/mlcomns_bert/start_training.sh -c train_bert -n 6 -e BERT_horovod_6gpu_6b_2400steps -- -i bert-tf:loic -g 6 -b 36
-mv ${BERT_OUTPUT_DIR}/* /dl-bench/lhovon/tracing_tools/trace_results/BERT_horovod_6gpu_6b_2400steps/
-rm -rf ${BERT_OUTPUT_DIR}/*
+        if [ $DRY_RUN = true ]
+        then
+            echo $exp_name
+        else
+            echo $exp_name | tee -a experiments_run
+            ./trace_v2.sh -w bert -l /dl-bench/lhovon/mlcomns_bert/start_training.sh -c bert_loic -n $num_gpu -e $exp_name -- $batch_size bert:loic
+            mv ${BERT_OUTPUT_DIR}/app.log /dl-bench/lhovon/tracing_tools/trace_results/${exp_name}/bert.log
+            rm -rf ${BERT_OUTPUT_DIR}/*
+        fi
+    done
+done
 
-./trace_v2.sh -w bert -l /dl-bench/lhovon/mlcomns_bert/start_training.sh -c train_bert -n 8 -e BERT_horovod_8gpu_6b_2400steps -- -i bert-tf:loic -g 8 -b 48
-mv ${BERT_OUTPUT_DIR}/* /dl-bench/lhovon/tracing_tools/trace_results/BERT_horovod_8gpu_6b_2400steps/
-rm -rf ${BERT_OUTPUT_DIR}/*
 
-exit 1
+
+
+# exit 1
 
 
 # declare -a num_gpus=(6 8)

@@ -41,7 +41,7 @@ tracepoint:syscalls:sys_exit_pwrite64
 	$now = nsecs;
 	$latency = $now - @write_start[tid];
 
-	printf("%-17lu %-8d 0x%-13lx %-10d %-10d %s\n", 
+	printf("%-17lu %-8d %-16llu %-10d %-10d %s\n", 
 		$now,
 		pid,
 		@write_offset[tid],
