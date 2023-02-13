@@ -20,9 +20,7 @@ BEGIN
 //     size_t count
 tracepoint:syscalls:sys_enter_write,
 tracepoint:syscalls:sys_enter_pwrite64
-/ 
-	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
-/
+/  == "python3" || comm == "mpirun" || comm == "horovodrun" || comm == "hydra_pmi_proxy" /
 {
 	@write_start[tid] = nsecs;
 }

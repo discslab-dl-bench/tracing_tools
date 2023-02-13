@@ -30,26 +30,6 @@ touch experiments_run
 
 for num_gpu in "${num_gpus[@]}";
 do  
-    for batch_size in "${batch_sizes_unet[@]}"
-    do
-        exp_name="UNET_original_1w_${num_gpu}GPU_batch${batch_size}"
-
-        if [ $DRY_RUN = true ]
-        then
-            echo $exp_name
-        else
-            echo $exp_name | tee -a experiments_run
-            # UNET - by default it will do 1 worker and do step 7
-            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- $batch_size
-            mv ${UNET_OUTPUT_DIR}/unet3d.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
-            rm -rf ${UNET_OUTPUT_DIR}/*
-        fi
-    done
-done
-
-
-for num_gpu in "${num_gpus[@]}";
-do  
     for batch_size in "${batch_sizes_dlrm[@]}"
     do
         exp_name="DLRM_${num_gpu}GPU_batch${batch_size}_32ksteps"
@@ -64,6 +44,26 @@ do
             mv ${DLRM_OUTPUT_DIR}/app.log /dl-bench/lhovon/tracing_tools/trace_results/${exp_name}/app.log
             mv ${DLRM_OUTPUT_DIR}/dlrm_tera.log /dl-bench/lhovon/tracing_tools/trace_results/${exp_name}/dlrm.log
             rm -rf ${DLRM_OUTPUT_DIR}/*
+        fi
+    done
+done
+
+
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_unet[@]}"
+    do
+        exp_name="UNET_original_1w_${num_gpu}GPU_batch${batch_size}"
+
+        if [ $DRY_RUN = true ]
+        then
+            echo $exp_name
+        else
+            echo $exp_name | tee -a experiments_run
+            # UNET - by default it will do 1 worker and do step 7
+            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- $batch_size
+            mv ${UNET_OUTPUT_DIR}/unet3d.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
+            rm -rf ${UNET_OUTPUT_DIR}/*
         fi
     done
 done

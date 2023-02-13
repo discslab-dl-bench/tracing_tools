@@ -23,7 +23,7 @@ BEGIN
 //     size_t count;
 tracepoint:syscalls:sys_enter_read,
 tracepoint:syscalls:sys_enter_pread64
-/ comm == "python" || comm == "run_pretraining" /
+/ comm == "python" || comm == "run_pretraining" || comm == "horovodrun" || comm == "mpirun" || comm == "hydra_pmi_proxy"/
 {
 	@read_start[tid] = nsecs;
 	@read_fd[tid] = args->fd; 
