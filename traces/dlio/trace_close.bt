@@ -19,9 +19,7 @@ BEGIN
 //    int __syscall_nr;
 //    unsigned int fd;
 tracepoint:syscalls:sys_enter_close
-/ 
-	comm == "python3" || comm == "mpirun" || comm == "horovodrun"
-/
+/ comm == "python3" || comm == "mpirun" || comm == "horovodrun" || comm == "hydra_pmi_proxy" /
 {	
 	@c_start[tid] = nsecs;
 	@c_fd[tid] = args->fd;
