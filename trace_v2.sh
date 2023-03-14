@@ -230,16 +230,23 @@ launchTraining() {
 launchAsWorkload() {
 	echo "Starting training with command: ${launch_script} $num_gpus $container_name ${extra_args}"
 	if [ $num_jobs -eq 1]; then 
-		launchJob $container_name
+		launchJob $container_name $launch_script
 	else 
 		for ((i=0; i<$num_jobs; i++)); do 
-			launchJob "$container_name-$i"
+			launchJob "$container_name-$i" "$launch_script -x $(getGpuNum $i)"
 		done
 	fi
 }
 
+getGpuNum() {
+	output=""
+	for ((i=0; i<$num_gpus; i++)); do
+		output+="$(($i + $num_gpus * $1))"
+	done
+}
+
 launchJob() {
-	tmux send-keys -t $1 "${launch_script} $num_gpus $1 ${extra_args}" C-m
+	tmux send-keys -t $1 "${2} $num_gpus $1 ${extra_args}" C-m
 	waitAFewSeconds
 	root_pid_launched_workload=$(getPIDOfLaunchedWorkload $1)
 	echo "root pid: \"$root_pid_launched_workload\""
