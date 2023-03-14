@@ -2,6 +2,7 @@
 
 #include <linux/fs.h>
 #include <linux/mm.h>
+#include <linux/uio.h>
 
 
 BEGIN
@@ -19,10 +20,34 @@ BEGIN
 //     const char * buf;
 //     size_t count
 tracepoint:syscalls:sys_enter_write,
+tracepoint:syscalls:sys_enter_writev,
 tracepoint:syscalls:sys_enter_pwrite64
 / comm == "python" /
 {
 	@write_start[tid] = nsecs;
+}
+
+
+// tracepoint:syscalls:sys_enter_writev
+//    int __syscall_nr;
+//    unsigned long fd;
+//    const struct iovec * vec;
+//    unsigned long vlen;
+
+// static ssize_t vfs_writev(struct file *file, const struct iovec __user *vec, unsigned long vlen, loff_t *pos, rwf_t flags)
+kprobe:vfs_writev
+/ @write_start[tid] /
+{
+	@write_filename[tid] = str(((struct file *)arg0)->f_path.dentry->d_name.name);
+	$iovec = ((struct iovec *)arg1);
+	@write_address[tid] = 0;
+	@write_offset[tid] = 0;
+}
+
+tracepoint:syscalls:sys_exit_writev
+/ comm == "python" /
+{
+	@writev_start[tid] = nsecs;
 }
 
 // ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_t *pos)
@@ -35,13 +60,14 @@ kprobe:vfs_write
 }
 
 tracepoint:syscalls:sys_exit_write,
+tracepoint:syscalls:sys_exit_writev,
 tracepoint:syscalls:sys_exit_pwrite64
 / @write_start[tid] /
 {
 	$now = nsecs;
 	$latency = $now - @write_start[tid];
 
-	printf("%-17lu %-8d %-16llu %-10d %-10d %s\n", 
+	printf("%-17lu %-8d %-16llu %-12lu %-12lu %s\n", 
 		$now,
 		pid,
 		@write_offset[tid],
