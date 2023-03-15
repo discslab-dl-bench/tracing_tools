@@ -229,10 +229,11 @@ launchTraining() {
 
 launchAsWorkload() {
 	if [ $num_jobs -eq 1 ]; then 
-		launchJob $container_name $launch_script ""
+		launchJob $container_name $launch_script "-o ${output_dir}"
 	else 
 		for ((i=0; i<$num_jobs; i++)); do 
-			launchJob "$container_name-$i" $launch_script "-x $(getGpuNum $i)"
+			mkdir "${output_dir}/job${i}"
+			launchJob "$container_name-$i" $launch_script "-x $(getGpuNum $i) -o ${output_dir}/job${i}"
 		done
 	fi
 }
