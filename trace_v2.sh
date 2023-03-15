@@ -15,7 +15,6 @@ trace_bio_pid=
 trace_read_pid=
 trace_write_pid=
 trace_create_del_pid=
-trace_create_del_pid=
 trace_openat_pid=
 trace_close_pid=
 trace_time_align_pid=
@@ -23,9 +22,11 @@ trace_syscalls_pid=
 trace_gpu_pid=
 iostat_pid=
 
+jobs_pids=()
+
 main() {
 	checkPermissionAndExit
-	getVars	
+	getVars	$@
 	validateArguments
 	setupVars
 	clearCache
@@ -33,6 +34,8 @@ main() {
 	startAllTmuxes
 	launchAllTraces
 	launchTraining
+	performStrace
+	waitAllTrainingFinished
 	flushSystem
 	terminate_traces $container_name
 	echo "All done. Don't forget to copy the application log if you need it for plotting."
@@ -48,8 +51,7 @@ checkPermissionAndExit() {
 }
 
 getVars() {
-	TEMP=$(getopt -o hl:n:j:o:e:sw:c: --long help,launch-script:,num-gpus:,num-jobs:,output-dir:,experiment-name:,strace,workload:,container: \
-				-n 'trace_v2' -- "$@")
+	TEMP=$(getopt -o hl:n:j:o:e:sw:c: --long help,launch-script:,num-gpus:,num-jobs:,output-dir:,experiment-name:,strace,workload:,container: -n 'trace_v2' -- "$@")
 	if [ $? != 0 ] ; then usage; exit 1 ; fi
 	eval set -- "$TEMP"
 
@@ -108,7 +110,7 @@ checkGPUNumeric() {
 }
 
 checkNumJobsGpusGood() {
-	if [$(($num_gpus * $num_jobs)) -gt $MAX_NUM_GPUS]; then
+	if [ $(($num_gpus * $num_jobs)) -gt $MAX_NUM_GPUS ]; then
 		echo "Error: there exists not enough GPUs for the given parameters"
 		exit 1
 	fi
@@ -154,11 +156,12 @@ flushSystem() {
 }
 
 startAllTmuxes() {
-	if [$num_jobs -eq 1]; then 
+	if [ $num_jobs -eq 1 ]; then 
 		startTmux $container_name
 	else
 		for ((i=0; i<$num_jobs; i++)); do
-			startTmux "$container_name-$num_jobs"
+			echo "Starting tmux ${container_name}-${i}"
+			startTmux "${container_name}-${i}"
 		done
 	fi
 }
@@ -228,12 +231,11 @@ launchTraining() {
 }
 
 launchAsWorkload() {
-	echo "Starting training with command: ${launch_script} $num_gpus $container_name ${extra_args}"
-	if [ $num_jobs -eq 1]; then 
-		launchJob $container_name $launch_script
+	if [ $num_jobs -eq 1 ]; then 
+		launchJob $container_name $launch_script ""
 	else 
 		for ((i=0; i<$num_jobs; i++)); do 
-			launchJob "$container_name-$i" "$launch_script -x $(getGpuNum $i)"
+			launchJob "$container_name-$i" $launch_script "-x $(getGpuNum $i)"
 		done
 	fi
 }
@@ -241,46 +243,41 @@ launchAsWorkload() {
 getGpuNum() {
 	output=""
 	for ((i=0; i<$num_gpus; i++)); do
-		output+="$(($i + $num_gpus * $1))"
+		output+="$(($i + $num_gpus * $1)),"
 	done
+	echo ${output%,}
 }
 
 launchJob() {
-	tmux send-keys -t $1 "${2} $num_gpus $1 ${extra_args}" C-m
+	echo "Starting training with command: $2 $num_gpus $1 $3 $extra_args"
+	tmux send-keys -t $1 "$2 $num_gpus $1 $3 $extra_args" C-m
 	waitAFewSeconds
-	root_pid_launched_workload=$(getPIDOfLaunchedWorkload $1)
-	echo "root pid: \"$root_pid_launched_workload\""
-	if $use_strace; then
-		attachStraceToPid $root_pid_launched_workload
-	fi
-	sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
-	docker top $1 -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
-	kill $trace_time_align_pid
-	echo "Now waiting until training completion"
-	while kill -0 "$root_pid_launched_workload"; do
-		sleep 5
-	done
+	pid=$(getPIDOfLaunchedWorkload $1)
+	jobs_pids+=($pid)
+	echo "root pid: \"$pid\""
 }
 
 getPIDOfLaunchedWorkload() {
 	maxAttempts=100
-	pid=$(getPidOfContainerRoot $1)
-	while [ -z "pid" ]
+	pid=$(getPIDOfRootOfContainer $1)
+	while [ -z "$pid" ]
 	do
-		if [ $max_retries == 0 ]; then
-			echo "ERROR: Could not get root PID. Exiting."
+		if [ $maxAttempts == 0 ]; then
+			echo "ERROR: Could not get root PID. Exiting." > /dev/tty
 			terminate_traces $1
 			exit 1
 		fi
-		max_retries=$(( $max_retries-1 ))
+		echo "Attempt: $maxAttempts, PID: $pid" > /dev/tty
+		maxAttempts=$(( $maxAttempts - 1 ))
 		sleep 0.05
-		pid=$(getPidOfContainerRoot $1)
+		pid=$(getPIDOfRootOfContainer $1)
 	done
+	echo $pid
 }
 
-getPIDOfContainerRoot() {
+getPIDOfRootOfContainer() {
 	pid=$(docker inspect -f '{{.State.Pid}}' $1) 2>/dev/null
-	return $pid
+	echo $pid
 }
 
 attachStraceToPid() {
@@ -296,6 +293,27 @@ launchAsExploration() {
 	echo "Hit Ctrl-C to stop..."
 	read -r -d '' _ </dev/tty
 	echo "Ctrl-C received. Stopping trace"
+}
+
+performStrace() {
+	if $use_strace; then
+		attachStraceToPid $root_pid_launched_workload
+	fi
+	sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
+	for ((i=0; i<$num_jobs; i++)); do
+		docker top "${container_name}-${i}" -efT >> ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+	done
+	
+	kill $trace_time_align_pid
+	echo "Now waiting until training completion"
+}
+
+waitAllTrainingFinished() {
+	for pid in "${jobs_pids[@]}"; do
+		while kill -0 "$pid"; do
+			sleep 5
+		done
+	done
 }
 
 
