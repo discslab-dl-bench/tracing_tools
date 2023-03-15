@@ -82,7 +82,7 @@ validateArguments() {
 }
 
 checkWorkloadIsOfEnumeration() {
-	[ -z $workload ] && echo -e "Workload is mandatory!\n" && usage
+	[ -z "$workload" ] && echo -e "Workload is mandatory!\n" && usage
 	
 	case $workload in
 		"bert" ) ;;
@@ -95,7 +95,7 @@ checkWorkloadIsOfEnumeration() {
 }
 
 checkLaunchScriptExist() {
-	if [[ $workload != "explore" ]]; then
+	if [[ "$workload" != "explore" ]]; then
 		[ -z $launch_script ] && echo -e "Launch script is mandatory!\n" && usage
 	fi
 
@@ -134,7 +134,7 @@ setupOutputDirectory() {
 }
 
 setupContainerName() {
-	[ -z $container_name ] && container_name=train_${workload}
+	[ -z "$container_name" ] && container_name=train_${workload}
 }
 
 ensureContainerNameNotTakenErrOtherwise() {
@@ -147,7 +147,7 @@ ensureContainerNameNotTakenErrOtherwise() {
 }
 
 clearCache() {
-	echo 3 > /proc/sys/vm/drop_caches
+	echo 3 > "/proc/sys/vm/drop_caches"
 }
 
 flushSystem() {
@@ -189,22 +189,19 @@ launchAllTraces() {
 }
 
 startBpfTraces() {
-	bpftrace traces/${workload}/trace_bio.bt -o ${output_dir}/trace_bio.out &
-	trace_bio_pid=$!
-	bpftrace traces/${workload}/trace_read.bt -o ${output_dir}/trace_read.out &
-	trace_read_pid=$!
-	bpftrace traces/${workload}/trace_write.bt -o ${output_dir}/trace_write.out &
-	trace_write_pid=$!
-	bpftrace traces/${workload}/trace_create_del.bt -o ${output_dir}/trace_create_del.out &
-	trace_create_del_pid=$!
-	bpftrace traces/${workload}/trace_openat.bt -o ${output_dir}/trace_openat.out &
-	trace_openat_pid=$!
-	bpftrace traces/${workload}/trace_close.bt -o ${output_dir}/trace_close.out &
-	trace_close_pid=$!
-	bpftrace traces/trace_time_align.bt -o ${output_dir}/trace_time_align.out &
-	trace_time_align_pid=$!
-	bpftrace traces/syscalls.bt -o ${output_dir}/syscalls.out &
-	trace_syscalls_pid=$!
+  trace_bio_pid=$(launchBpfTrace "trace_bio")
+  trace_read_pid=$(launchBpfTrace "trace_read")
+  trace_write_pid=$(launchBpfTrace "trace_write")
+  trace_create_del_pid=$(launchBpfTrace "trace_create_del")
+  trace_openat_pid=$(launchBpfTrace "trace_openat")
+  trace_close_pid=$(launchBpfTrace "trace_close")
+  trace_time_align_pid=$(launchBpfTrace "trace_time_align")
+  trace_syscalls_pid=$(launchBpfTrace "syscalls")
+}
+
+launchBpfTrace() {
+	bpftrace "traces/${workload}/${1}.bt" -o "${output_dir}/${1}.out" &> /dev/null &
+	echo $!
 }
 
 startGpuCpuTrace() {
