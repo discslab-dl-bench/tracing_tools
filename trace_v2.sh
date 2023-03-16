@@ -37,7 +37,7 @@ main() {
 	performStrace
 	waitAllTrainingFinished
 	flushSystem
-	terminate_traces $container_name
+	terminateTraces $container_name
 	echo "All done. Don't forget to copy the application log if you need it for plotting."
 	exit 0
 }
@@ -323,7 +323,8 @@ usage() {
 	echo -e "                  \t\tWith explore, traces are launched without attaching to a particular workload"
 	echo -e "  -l, --launch-script\t\tPath to the workload launch script"
 	echo -e "  -c, --container\t\tName to give the docker container running the workload - defaults to train_{workload}"
-	echo -e "  -n, --num-gpus\t\tNumber of GPUs to launch the workload with, defaults to 1"
+	echo -e "  -n, --num-gpus\t\tNumber of GPUs to launch a single instance of the workload with, defaults to 1"
+	echo -e "  -j, --num-jobs\t\tNumber of instances to run the workload, dividing available GPUs evenly"
 	echo -e "  -o, --output-dir\t\tDirectory where to write the traces, defaults to ./trace_results"
 	echo -e "  -e, --experiment-name\t\tOptional experiment name, defaults to \"experiment\""
 	echo -e "  -s, --strace\t\t\tUse strace to record all system calls made (very intensive)"
@@ -333,8 +334,14 @@ usage() {
 	exit 1
 }
 
-terminate_traces() {
-	docker kill $1 2>/dev/null
+terminateTraces() {
+	if [ $num_jobs -eq 1 ]; then 
+		docker kill $1 2>/dev/null
+	else 
+		for ((i=0; i<$num_jobs; i++)); do 
+			docker kill "${1}-${i}" 2>/dev/null
+		done
+	fi
 	killAllTraces
 	killRemainingTraces
 }
