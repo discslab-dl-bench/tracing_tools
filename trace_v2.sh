@@ -264,7 +264,7 @@ launchJob() {
 getLaunchedJobsPIDs() {
 	if [ $num_jobs -eq 1 ]; then
 		pid=$(getPIDOfLaunchedWorkload $container_name)
-		jobs_pid+=($pid)
+		jobs_pids+=($pid)
 		echo "root pid: \"$pid\""
 	else 
 		for ((i=0; i<$num_jobs; i++)); do 
@@ -316,12 +316,18 @@ launchAsExploration() {
 
 performStrace() {
 	if $use_strace; then
-		attachStraceToPid $root_pid_launched_workload
+		for ((i=0; i<$num_jobs; i++)); do
+			attachStraceToPid $jobs_pids[$i]
+		done
 	fi
 	sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
-	for ((i=0; i<$num_jobs; i++)); do
-		docker top "${container_name}-${i}" -efT >> ${output_dir}/pids_$(date +'%m%d%H%M%S').out
-	done
+	if [ $num_jobs -eq 1 ]; then
+		docker top "$container_name" -efT >> ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+	else
+		for ((i=0; i<$num_jobs; i++)); do
+			docker top "${container_name}-${i}" -efT >> ${output_dir}/pids_$i_$(date +'%m%d%H%M%S').out
+		done
+	fi
 	
 	kill $trace_time_align_pid
 	echo "Now waiting until training completion"
