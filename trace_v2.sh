@@ -34,6 +34,8 @@ main() {
 	startAllTmuxes
 	launchAllTraces
 	launchTraining
+	waitAFewSeconds
+	getLaunchedJobsPIDs
 	performStrace
 	waitAllTrainingFinished
 	flushSystem
@@ -189,18 +191,26 @@ launchAllTraces() {
 }
 
 startBpfTraces() {
-  trace_bio_pid=$(launchBpfTrace "trace_bio")
-  trace_read_pid=$(launchBpfTrace "trace_read")
-  trace_write_pid=$(launchBpfTrace "trace_write")
-  trace_create_del_pid=$(launchBpfTrace "trace_create_del")
-  trace_openat_pid=$(launchBpfTrace "trace_openat")
-  trace_close_pid=$(launchBpfTrace "trace_close")
-  trace_time_align_pid=$(launchBpfTrace "trace_time_align")
-  trace_syscalls_pid=$(launchBpfTrace "syscalls")
+  trace_bio_pid=$(launchBpfTraceFromWorkload "trace_bio")
+  trace_read_pid=$(launchBpfTraceFromWorkload "trace_read")
+  trace_write_pid=$(launchBpfTraceFromWorkload "trace_write")
+  trace_create_del_pid=$(launchBpfTraceFromWorkload "trace_create_del")
+  trace_openat_pid=$(launchBpfTraceFromWorkload "trace_openat")
+  trace_close_pid=$(launchBpfTraceFromWorkload "trace_close")
+  trace_time_align_pid=$(launchBpfTraceFromTraceDirectory "trace_time_align")
+  trace_syscalls_pid=$(launchBpfTraceFromTraceDirectory "syscalls")
+}
+
+launchBpfTraceFromWorkload() {
+	echo $(launchBpfTrace "traces/${workload}/${1}.bt" "${output_dir}/${1}.out")
+}
+
+launchBpfTraceFromTraceDirectory() {
+	echo $(launchBpfTrace "traces/${1}.bt" "${output_dir}/${1}.out")
 }
 
 launchBpfTrace() {
-	bpftrace "traces/${workload}/${1}.bt" -o "${output_dir}/${1}.out" &> /dev/null &
+	bpftrace $1 -o $2 &> /dev/null &
 	echo $!
 }
 
@@ -249,10 +259,20 @@ getGpuNum() {
 launchJob() {
 	echo "Starting training with command: $2 $num_gpus $1 $3 $extra_args"
 	tmux send-keys -t $1 "$2 $num_gpus $1 $3 $extra_args" C-m
-	waitAFewSeconds
-	pid=$(getPIDOfLaunchedWorkload $1)
-	jobs_pids+=($pid)
-	echo "root pid: \"$pid\""
+}
+
+getLaunchedJobsPIDs() {
+	if [ $num_jobs -eq 1 ]; then
+		pid=$(getPIDOfLaunchedWorkload $container_name)
+		jobs_pids+=($pid)
+		echo "root pid: \"$pid\""
+	else 
+		for ((i=0; i<$num_jobs; i++)); do 
+			pid=$(getPIDOfLaunchedWorkload "$container_name-$i")
+			jobs_pids+=($pid)
+			echo "root of job $i pid: \"$pid\""
+		done
+	fi
 }
 
 getPIDOfLaunchedWorkload() {
@@ -278,6 +298,7 @@ getPIDOfRootOfContainer() {
 	echo $pid
 }
 
+
 attachStraceToPid() {
 	strace -T -tt -f -p $1 -e 'trace=!ioctl,clock_gettime,clock_nanosleep,sched_yield,nanosleep,sched_getaffinity,sched_setaffinity,futex,set_robust_list,poll,epoll_wait,brk' -o ${output_dir}/strace.out &
 }
@@ -295,12 +316,18 @@ launchAsExploration() {
 
 performStrace() {
 	if $use_strace; then
-		attachStraceToPid $root_pid_launched_workload
+		for ((i=0; i<$num_jobs; i++)); do
+			attachStraceToPid $jobs_pids[$i]
+		done
 	fi
 	sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
-	for ((i=0; i<$num_jobs; i++)); do
-		docker top "${container_name}-${i}" -efT >> ${output_dir}/pids_$(date +'%m%d%H%M%S').out
-	done
+	if [ $num_jobs -eq 1 ]; then
+		docker top "$container_name" -efT >> ${output_dir}/pids_$(date +'%m%d%H%M%S').out
+	else
+		for ((i=0; i<$num_jobs; i++)); do
+			docker top "${container_name}-${i}" -efT >> ${output_dir}/pids_$i_$(date +'%m%d%H%M%S').out
+		done
+	fi
 	
 	kill $trace_time_align_pid
 	echo "Now waiting until training completion"
