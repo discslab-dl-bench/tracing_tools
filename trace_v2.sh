@@ -204,7 +204,7 @@ main() {
 
 		max_retries=100
 		# If the previous command did not work (sometimes we must wait a bit), retry in a loop
-		while [ -z "$root_pid" ]
+		while [ -z "$root_pid" ] || [ $root_pid -eq 0 ]
 		do
 			if [ $max_retries == 0 ]; then
 				echo "ERROR: Could not get root PID. Exiting."
@@ -228,7 +228,7 @@ main() {
 		# docker top $container_name -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 
 		# Sleep a bit to let training spawn all workers
-		sleep 120 && echo "Slept 120s, collecting PIDs/TIDs again and ending time_alignment trace"
+		sleep 60 && echo "Slept 60s, collecting PIDs/TIDs again and ending time_alignment trace"
 		# Capture PIDs/TIDs again now that workload should be in steady state
 		docker top $container_name -efT > ${output_dir}/pids_$(date +'%m%d%H%M%S').out
 
