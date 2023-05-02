@@ -33,7 +33,7 @@ usage() {
 	echo -e "Usage: $0 [OPTIONS] [WORKLOAD ARGS]"
 	echo -e "\nOptions:"
 	echo -e "  -h, --help\t\t\tPrint this message"
-	echo -e "  -w, --workload\t\tName of the workload. Must be one of bert, dlrm, imseg, dlio or explore"
+	echo -e "  -w, --workload\t\tName of the workload. Must be one of bert, dlrm, unet3d, dlio or explore"
 	echo -e "                  \t\tWith explore, traces are launched without attaching to a particular workload"
 	echo -e "  -l, --launch-script\t\tPath to the workload launch script"
 	echo -e "  -c, --container\t\tName to give the docker container running the workload - defaults to train_{workload}"
@@ -98,10 +98,10 @@ main() {
 	case $workload in
 		"bert" ) ;;
 		"dlrm" ) ;;
-		"imseg" ) ;;
+		"unet3d" ) ;;
 		"dlio" ) ;;
 		"explore" ) ;;
-		* ) echo "Error: Invalid workload given. Must be one of bert, dlrm, imseg, dlio or explore"; exit 1 ;;
+		* ) echo "Error: Invalid workload given. Must be one of bert, dlrm, unet3d, dlio or explore"; exit 1 ;;
 	esac
 
 	[ -z $container_name ] && container_name=train_${workload}

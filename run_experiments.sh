@@ -26,7 +26,7 @@ declare -a batch_sizes_bert=(1 2 3 4 5 6)
 declare -a batch_sizes_bert_exp=(6 7 8 9 10 11)
 
 
-UNET_OUTPUT_DIR="/raid/data/imseg/run_output"
+UNET_OUTPUT_DIR="/raid/data/unet3d/run_output"
 DLRM_OUTPUT_DIR="/raid/data/dlrm/run_output"
 BERT_OUTPUT_DIR="/raid/data/bert/run_output"
 DLIO_OUTPUT_DIR="/raid/data/dlio/run_output"
@@ -54,7 +54,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training_gen.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:instrumented $batch_size 1 10
+            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training_gen.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:instrumented $batch_size 1 10
         fi
     done
 done
@@ -86,7 +86,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:sleep $batch_size
+            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:sleep $batch_size
         fi
     done
 done
@@ -141,7 +141,7 @@ done
 #         if [ ! -d trace_results/$exp_name ]
 #         then
 #             echo "$(date) - $exp_name" | tee -a experiments_run
-#             /dl-bench/lhovon/mlcomns_imseg/start_training.sh $num_gpu unet3d_loic /dl-bench/lhovon/tracing_tools/trace_results/$exp_name unet3d:validate-instru $batch_size 1 20
+#             /dl-bench/lhovon/mlcomns_unet3d/start_training.sh $num_gpu unet3d_loic /dl-bench/lhovon/tracing_tools/trace_results/$exp_name unet3d:validate-instru $batch_size 1 20
 #         fi
 #     done
 # done
@@ -360,7 +360,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:load-only $batch_size
+            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:load-only $batch_size
         fi
     done
 done
@@ -375,7 +375,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:no-step-7 $batch_size
+            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:no-step-7 $batch_size
         fi
     done
 done
@@ -473,7 +473,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training_gen.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:instrumented $batch_size 1 10
+            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training_gen.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:instrumented $batch_size 1 10
         fi
     done
 done
@@ -514,7 +514,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:sleep $batch_size
+            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:sleep $batch_size
         fi
     done
 done
@@ -606,7 +606,7 @@ done
 #         if [ ! -d trace_results/$exp_name ]
 #         then
 #             echo "$(date) - $exp_name" | tee -a experiments_run
-#             ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:instrumented $batch_size 1 20
+#             ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:instrumented $batch_size 1 20
 #             rm -r $UNET_OUTPUT_DIR/*
 #         fi
 #     done
@@ -622,7 +622,7 @@ done
 #         if [ ! -d trace_results/$exp_name ]
 #         then
 #             echo "$(date) - $exp_name" | tee -a experiments_run
-#             ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:sleep $batch_size 1 20
+#             ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:sleep $batch_size 1 20
 #         fi
 #     done
 # done
@@ -689,7 +689,7 @@ do
         exp_name="UNET_instru_${num_gpu}g_${batch_size}b_1w"
 
         echo "$(date) - $exp_name" | tee -a experiments_run
-        ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:loic $batch_size
+        ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:loic $batch_size
 
     done
 done
@@ -741,7 +741,7 @@ echo "$(date) - $exp_name" | tee -a experiments_run
 
 exp_name=UNET_8g4b_noinstru
 echo "$(date) - $exp_name" | tee -a experiments_run
-./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:no-instru $batch_size
+./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:no-instru $batch_size
 
 
 ./trace_v2.sh -w dlrm -l /dl-bench/lhovon/mlcomns_dlrm/start_training.sh -c dlrm_loic -n $num_gpu -e $exp_name -- dlrm:loic $batch_size 16384 $NUM_STEPS 1  
@@ -802,7 +802,7 @@ rm -r $BERT_OUTPUT_DIR/*
 
 # exp_name=UNET_standard_run_log_sda
 # echo "$(date) - $exp_name" | tee -a experiments_run
-# ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n 8 -e $exp_name -- unet3d:loic 4
+# ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n 8 -e $exp_name -- unet3d:loic 4
 
 
 
@@ -1083,7 +1083,7 @@ done
 #         echo $exp_name
 #     else
 #         echo "$(date) - $exp_name" | tee -a experiments_run
-#         ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- 4 unet3d:loic $num_worker
+#         ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- 4 unet3d:loic $num_worker
 #         mv ${UNET_OUTPUT_DIR}/*.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
 #         rm -rf ${UNET_OUTPUT_DIR}/*
 #     fi
@@ -1120,19 +1120,19 @@ done
 
 # exp_name=UNET_200GB_1xmem
 # echo "$(date) - $exp_name" | tee -a experiments_run
-# ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training_200gb.sh -c unet3d_loic -n 8 -e $exp_name -- 2 200
+# ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training_200gb.sh -c unet3d_loic -n 8 -e $exp_name -- 2 200
 # mv ${UNET_OUTPUT_DIR}/*.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
 # rm -rf ${UNET_OUTPUT_DIR}/*
 
 # exp_name=UNET_200GB_2xmem_2
 # echo "$(date) - $exp_name" | tee -a experiments_run
-# ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training_200gb.sh -c unet3d_loic -n 8 -e $exp_name -- 2 100 1
+# ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training_200gb.sh -c unet3d_loic -n 8 -e $exp_name -- 2 100 1
 # mv ${UNET_OUTPUT_DIR}/*.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
 # rm -rf ${UNET_OUTPUT_DIR}/*
 
 # exp_name=UNET_200GB_5xmem_2
 # echo "$(date) - $exp_name" | tee -a experiments_run
-# ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training_200gb.sh -c unet3d_loic -n 8 -e $exp_name -- 2 40 1
+# ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training_200gb.sh -c unet3d_loic -n 8 -e $exp_name -- 2 40 1
 # mv ${UNET_OUTPUT_DIR}/*.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
 # rm -rf ${UNET_OUTPUT_DIR}/*
 
@@ -1141,7 +1141,7 @@ done
 
 # exp_name=UNET_30GB_generated2
 # echo "$(date) - $exp_name" | tee -a experiments_run
-# ./trace_v2.sh -w imseg -l /dl-bench/lhovon/mlcomns_imseg/start_training_on_generated.sh -c unet3d_loic -n 8 -e $exp_name -- 2
+# ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training_on_generated.sh -c unet3d_loic -n 8 -e $exp_name -- 2
 # mv ${UNET_OUTPUT_DIR}/unet3d.log /dl-bench/lhovon/tracing_tools/trace_results/$exp_name
 # rm -rf ${UNET_OUTPUT_DIR}/*
 
