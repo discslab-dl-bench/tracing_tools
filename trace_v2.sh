@@ -195,9 +195,11 @@ main() {
 	# At this point, if we don't have a launch script, we are in pure exploration mode
 	# which is handled in the else clause: we just launch the traces and wait for Ctrl-C
 	if [[ ! -z $launch_script ]]; then
+
 		echo "Starting training with command: ${launch_script} $num_gpus $container_name $output_dir ${extra_args}"
 		# Start training within the tmux session, passing any extra arguments
 		tmux send-keys -t $container_name "${launch_script} $num_gpus $container_name $output_dir ${extra_args}" C-m
+		
 		sleep 1
 		# Get the system-wide PID of the root process ID in the container (bash)
 		root_pid=$(docker inspect -f '{{.State.Pid}}' $container_name)

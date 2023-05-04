@@ -1,63 +1,149 @@
 #!/bin/bash
 
 #### Scaffold script to run multiple experiments
-#### Uncomment and modify
 
-if [ $# = 1 ]
-then
-    DRY_RUN=true
-else
-    DRY_RUN=false
-fi
+SCRIPT_DIR=$(dirname -- "$( readlink -f -- "$0"; )")
 
+TRACES_DIR=$SCRIPT_DIR/trace_results
 
+# Define the configuration space we will explore for number of GPUs and batch sizes
 declare -a num_gpus=(1 2 4 6 8)
-declare -a num_workers=(1 2 4 6 8)
 
-declare -a num_gpus_exp=(8 12 16 20 24)
-
-
-# # per worker batch sizes
 declare -a batch_sizes_unet=(1 2 3 4 5)
-
 declare -a batch_sizes_dlrm=(2048 4096 8192 16384 32768 65536 131072)
 declare -a batch_sizes_bert=(1 2 3 4 5 6)
 
-declare -a batch_sizes_bert_exp=(6 7 8 9 10 11)
 
-
+# Checkpoint output directories
+# We clean up after each run as they take up space
+# and because BERT will try to load from an existing checkpoint
 UNET_OUTPUT_DIR="/raid/data/unet3d/run_output"
 DLRM_OUTPUT_DIR="/raid/data/dlrm/run_output"
 BERT_OUTPUT_DIR="/raid/data/bert/run_output"
 DLIO_OUTPUT_DIR="/raid/data/dlio/run_output"
 
-echo "" >> experiments_run
-echo "" >> experiments_run
-
 rm -r $DLRM_OUTPUT_DIR/*
 rm -r $UNET_OUTPUT_DIR/*
 rm -r $BERT_OUTPUT_DIR/*
+rm -r $DLIO_OUTPUT_DIR/*
+
+# To keep track of which experiments have run
+echo "" >> experiments_run
+echo "" >> experiments_run
 
 
-declare -a num_gpus_missing=(1 2)
-declare -a batch_sizes_dlrm_missing=(2048 4096 8192 16384)
+
+UNET3D_instru_image="unet3d:instrumented"
+UNET3D_sleep_image="unet3d:instrumented"
+UNET3D_benchmark_image="dlio:instrumented"
 
 
+################
+# UNET3D
+################
 
-# WARNING: This one takes FOREVER to complete
-# unet3d on generated data 2 with dataloading further instrumentation
+
+# UNET3D instrumented runs
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_unet[@]}";
+    do
+        exp_name="UNET3D_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            /dl-bench/lhovon/mlcomns_imseg/start_training.sh $num_gpu unet3d_run $log_dir $UNET3D_instru_image $batch_size 10
+        fi
+    done
+done
+
+
+# UNET3D generated data runs -- make sure you've updated the launch script to point to your generated dataset!
 for num_gpu in "${num_gpus[@]}";
 do  
     for batch_size in "${batch_sizes_unet[@]}";
     do
         exp_name="UNET3D_gen_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training_gen.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:instrumented $batch_size 1 10
+            /dl-bench/lhovon/mlcomns_imseg/start_training_on_generated.sh $num_gpu unet3d_run $log_dir $UNET3D_instru_image $batch_size 10
         fi
     done
 done
+
+
+# UNET3D sleep experiments
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_unet[@]}";
+    do
+        exp_name="UNET3D_sleep_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+        
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            /dl-bench/lhovon/mlcomns_imseg/start_training.sh $num_gpu unet3d_run $log_dir unet3d:sleep $batch_size 10
+        fi
+    done
+done
+
+
+# Benchmark UNET3D runs
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_unet[@]}";
+    do
+        exp_name="UNET3D_benchmark_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            /dl-bench/lhovon/dlio/start_unet3d.sh $num_gpus unet3d_run $log_dir dlio:latest $batch_size 10
+        fi
+    done
+done
+
+
+################
+# BERT
+################
+
+
+
+
+
+# 1 GPU (and more) simulations
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_bert_exp[@]}"
+    do
+        exp_name="DLIO_BERT_${num_gpu}GPU_${batch_size}b_extra_batches"
+        log_dir=$TRACES_DIR/$exp_name
+
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            /dl-bench/lhovon/dlio/start_bert.sh $num_gpu dlio_loic $log_dir dlio:test $batch_size 300 False False
+        fi
+    done
+done
+
+
+
+
+
+
+
+################
+# DLRM
+################
 
 
 # DLRM SLEEP - Missing
@@ -77,19 +163,6 @@ done
 
 
 
-# UNET3D sleep + 2s
-for num_gpu in "${num_gpus[@]}";
-do  
-    for batch_size in "${batch_sizes_unet[@]}"
-    do
-        exp_name="UNET3D_sleep_${num_gpu}g_${batch_size}b"
-        if [ ! -d trace_results/$exp_name ]
-        then
-            echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w unet3d -l /dl-bench/lhovon/mlcomns_unet3d/start_training.sh -c unet3d_loic -n $num_gpu -e $exp_name -- unet3d:sleep $batch_size
-        fi
-    done
-done
 
 
 exit 
@@ -264,21 +337,6 @@ done
 exit
 
 
-
-# BERT - formula!!
-# 1 GPU (and more) simulations
-for num_gpu in "${num_gpus[@]}";
-do  
-    for batch_size in "${batch_sizes_bert_exp[@]}"
-    do
-        exp_name="DLIO_BERT_${num_gpu}GPU_${batch_size}b_extra_batches"
-        if [ ! -d trace_results/$exp_name ]
-        then
-            echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w dlio -l /dl-bench/lhovon/dlio/start_training.sh -c dlio_loic -n $num_gpu -e $exp_name -- dlio:bert-instru bert $batch_size 300
-        fi
-    done
-done
 
 
 
