@@ -31,12 +31,13 @@ rm -r $DLIO_OUTPUT_DIR/*
 echo "" >> experiments_run
 echo "" >> experiments_run
 
+# Path to the vldb-reproduce directory
+parent_repo_dir="/dl-bench/lhovon/vldb-reproduce/"
 
 
 UNET3D_instru_image="unet3d:instrumented"
-UNET3D_sleep_image="unet3d:instrumented"
-UNET3D_benchmark_image="dlio:instrumented"
-
+UNET3D_sleep_image="unet3d:sleep"
+Benchmark_instru_image="dlio:instrumented"
 
 ################
 # UNET3D
@@ -54,7 +55,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            /dl-bench/lhovon/mlcomns_imseg/start_training.sh $num_gpu unet3d_run $log_dir $UNET3D_instru_image $batch_size 10
+            $parent_repo_dir/unet3d_instrumented/start_training.sh $num_gpu unet3d_run $log_dir $UNET3D_instru_image $batch_size 10
         fi
     done
 done
@@ -71,7 +72,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            /dl-bench/lhovon/mlcomns_imseg/start_training_on_generated.sh $num_gpu unet3d_run $log_dir $UNET3D_instru_image $batch_size 10
+            $parent_repo_dir/unet3d_instrumented/start_training_on_generated.sh $num_gpu unet3d_run $log_dir $UNET3D_instru_image $batch_size 10
         fi
     done
 done
@@ -88,7 +89,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            /dl-bench/lhovon/mlcomns_imseg/start_training.sh $num_gpu unet3d_run $log_dir unet3d:sleep $batch_size 10
+            $parent_repo_dir/unet3d_instrumented/start_training.sh $num_gpu unet3d_run $log_dir $UNET3D_sleep_image $batch_size 10
         fi
     done
 done
@@ -105,10 +106,12 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            /dl-bench/lhovon/dlio/start_unet3d.sh $num_gpus unet3d_run $log_dir dlio:latest $batch_size 10
+           $parent_repo_dir/benchamrk_instrumented/benchmark_unet3d.sh $num_gpus dlio_unet3d $log_dir $Benchmark_instru_image $batch_size 10
         fi
     done
 done
+
+
 
 
 ################
@@ -118,25 +121,21 @@ done
 
 
 
-
-# 1 GPU (and more) simulations
+# Benchmark BERT runs
 for num_gpu in "${num_gpus[@]}";
 do  
-    for batch_size in "${batch_sizes_bert_exp[@]}"
+    for batch_size in "${batch_sizes_bert[@]}";
     do
-        exp_name="DLIO_BERT_${num_gpu}GPU_${batch_size}b_extra_batches"
+        exp_name="BERT_benchmark_${num_gpu}g_${batch_size}b"
         log_dir=$TRACES_DIR/$exp_name
 
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            /dl-bench/lhovon/dlio/start_bert.sh $num_gpu dlio_loic $log_dir dlio:test $batch_size 300 False False
+           $parent_repo_dir/benchamrk_instrumented/benchmark_bert.sh $num_gpus dlio_bert $log_dir $Benchmark_instru_image $batch_size 100 False False
         fi
     done
 done
-
-
-
 
 
 
