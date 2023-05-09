@@ -37,12 +37,23 @@ parent_repo_dir="/dl-bench/lhovon/vldb-reproduce/"
 
 UNET3D_instru_image="unet3d:instrumented"
 UNET3D_sleep_image="unet3d:sleep"
+
+BERT_instru_image="bert:profiler"
+
+DLRM_instru_image="dlrm:instrumented"
+DLRM_sleep_image="dlrm:sleep"
+
 Benchmark_instru_image="dlio:instrumented"
+
 
 ################
 # UNET3D
 ################
 
+
+
+
+exit
 
 # UNET3D instrumented runs
 for num_gpu in "${num_gpus[@]}";
@@ -106,7 +117,8 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-           $parent_repo_dir/benchamrk_instrumented/benchmark_unet3d.sh $num_gpus dlio_unet3d $log_dir $Benchmark_instru_image $batch_size 10
+           $parent_repo_dir/benchmark_instrumented/benchmark_unet3d.sh $num_gpus dlio_unet3d $log_dir $Benchmark_instru_image $batch_size 10
+
         fi
     done
 done
@@ -119,7 +131,47 @@ done
 ################
 
 
+# BERT Profiler runs
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_bert[@]}";
+    do
+        exp_name="BERT_profiler_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
 
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            $parent_repo_dir/bert_instrumented/start_training.sh $num_gpus bert_run $log_dir $BERT_instru_image $batch_size 30
+            
+            # Delete everything excpet profiler traces
+            ls -d $log_dir/* | grep -v 'timeline-.*.json' | xargs rm
+            # delete checkpoint
+            rm -r $BERT_OUTPUT_DIR/*
+        fi
+    done
+done
+
+# BERT Profiler runs
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_bert[@]}";
+    do
+        exp_name="BERT_gen_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            $parent_repo_dir/bert_instrumented/start_training_on_generated.sh $num_gpus bert_run $log_dir $BERT_instru_image $batch_size 30
+            
+            # Delete everything excpet profiler traces
+            ls -d $log_dir/* | grep -v 'timeline-.*.json' | xargs rm
+            # delete checkpoint
+            rm -r $BERT_OUTPUT_DIR/*
+        fi
+    done
+done
 
 # Benchmark BERT runs
 for num_gpu in "${num_gpus[@]}";
@@ -132,7 +184,7 @@ do
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-           $parent_repo_dir/benchamrk_instrumented/benchmark_bert.sh $num_gpus dlio_bert $log_dir $Benchmark_instru_image $batch_size 100 False False
+           $parent_repo_dir/benchmark_instrumented/benchmark_bert.sh $num_gpus dlio_bert $log_dir $Benchmark_instru_image $batch_size 300 False False
         fi
     done
 done
@@ -145,16 +197,40 @@ done
 ################
 
 
-# DLRM SLEEP - Missing
+# DLRM Instrumented runs
 for num_gpu in "${num_gpus[@]}";
 do  
-    for batch_size in "${batch_sizes_dlrm[@]}"
+    for batch_size in "${batch_sizes_dlrm[@]}";
     do
-        exp_name="DLRM_sleep_${num_gpu}g_${batch_size}b"
+        exp_name="DLRM_instru_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+
         if [ ! -d trace_results/$exp_name ]
         then
             echo "$(date) - $exp_name" | tee -a experiments_run
-            ./trace_v2.sh -w dlrm -l /dl-bench/lhovon/mlcomns_dlrm/start_training.sh -c dlrm_loic -n $num_gpu -e $exp_name -- dlrm:sleep $batch_size 16384 4096
+            $parent_repo_dir/dlrm_instrumented/start_training.sh $num_gpus dlrm_run $log_dir $DLRM_instru_image $batch_size 2048
+            
+            # delete checkpoint
+            rm -r $DLRM_OUTPUT_DIR/*
+        fi
+    done
+done
+
+
+# DLRM Generated data runs
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_dlrm[@]}";
+    do
+        exp_name="DLRM_gen_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            $parent_repo_dir/dlrm_instrumented/start_training_on_generated.sh $num_gpus dlrm_run $log_dir $DLRM_instru_image $batch_size 2048
+            
+            # delete checkpoint
             rm -r $DLRM_OUTPUT_DIR/*
         fi
     done
@@ -162,9 +238,41 @@ done
 
 
 
+# DLRM Sleep runs
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_dlrm[@]}";
+    do
+        exp_name="DLRM_sleep_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
 
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+            $parent_repo_dir/dlrm_sleep/start_training.sh $num_gpus dlrm_run $log_dir $DLRM_instru_image $batch_size 2048
+            
+            # delete checkpoint
+            rm -r $DLRM_OUTPUT_DIR/*
+        fi
+    done
+done
 
-exit 
+# Benchmark DLRM runs
+for num_gpu in "${num_gpus[@]}";
+do  
+    for batch_size in "${batch_sizes_bert[@]}";
+    do
+        exp_name="DLRM_benchmark_${num_gpu}g_${batch_size}b"
+        log_dir=$TRACES_DIR/$exp_name
+
+        if [ ! -d trace_results/$exp_name ]
+        then
+            echo "$(date) - $exp_name" | tee -a experiments_run
+           $parent_repo_dir/benchmark_instrumented/benchmark_dlrm.sh $num_gpus dlio_dlrm $log_dir $Benchmark_instru_image $batch_size 2048
+        fi
+    done
+done
+
 
 
 
